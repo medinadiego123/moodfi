@@ -15,8 +15,10 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: process.env.NODE_ENV === 'production' } // Set cookie security based on environment
+    cookie: { secure: true, sameSite: 'lax' }
 }));
+
+
 
 // Set up EJS as the view engine and point to the correct views directory
 app.set('view engine', 'ejs');
@@ -30,14 +32,22 @@ app.get('/', (req, res) => {
 
 // Spotify authorization login route
 app.get('/login', (req, res) => {
+    console.log("Redirecting to Spotify authorization");
     const mood = req.query.mood || '';
     res.redirect(`https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}&state=${mood}`);
 });
-
 // Callback route to get access token
 app.get('/callback', async (req, res) => {
     const code = req.query.code || null;
     const mood = req.query.state || '';
+
+    console.log("Code received:", code);  // Debugging
+    console.log("Mood received:", mood);  // Debugging
+
+    if (!code) {
+        console.error("Authorization code missing. Redirecting to /login.");
+        return res.redirect('/login');
+    }
 
     try {
         const response = await fetch('https://accounts.spotify.com/api/token', {
@@ -54,12 +64,15 @@ app.get('/callback', async (req, res) => {
         });
 
         const data = await response.json();
+        console.log("Data received from Spotify token request:", data); // Debugging log
+
         if (data.access_token) {
             console.log("Access Token Received:", data.access_token);
             req.session.accessToken = data.access_token;
             req.session.refreshToken = data.refresh_token;
             res.redirect(`/generate?mood=${mood}`);
         } else {
+            console.error("Failed to obtain access token:", data);
             throw new Error('Failed to obtain access token');
         }
     } catch (error) {
