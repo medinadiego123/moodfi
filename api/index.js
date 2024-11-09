@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const fetch = require('node-fetch');
@@ -5,16 +6,16 @@ const path = require('path');
 
 const app = express();
 const port = process.env.PORT || 3000;
-const CLIENT_ID = '396494146c974c8eb1102bf96c2e463c';
-const CLIENT_SECRET = 'ef8dc3565d894e6ca661fd679321fe4e';
-const REDIRECT_URI = 'https://moodfi.vercel.app/callback';
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const REDIRECT_URI = process.env.REDIRECT_URI || 'https://moodfi.vercel.app/callback';
 const SCOPES = 'user-top-read playlist-modify-public playlist-modify-private';
 
 app.use(session({
-    secret: 'your_secret_key',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }
+    cookie: { secure: process.env.NODE_ENV === 'production' } // Set cookie security based on environment
 }));
 
 // Set up EJS as the view engine and point to the correct views directory
@@ -103,7 +104,6 @@ app.get('/generate', async (req, res) => {
     }
 });
 
-
 // Helper function to refresh the access token if needed
 async function refreshAccessToken(refreshToken) {
     const response = await fetch('https://accounts.spotify.com/api/token', {
@@ -151,7 +151,6 @@ async function getUserTopArtistsAndTracks(accessToken) {
     }
 }
 
-
 // Helper function to ensure 10 songs if initial fetch lacks them
 async function fetchAdditionalTracks(genres, requiredCount, accessToken) {
     let additionalTracks = [];
@@ -180,7 +179,6 @@ async function fetchAdditionalTracks(genres, requiredCount, accessToken) {
         return [];
     }
 }
-
 
 // Refined `searchTracks` function with user-based seeds and mood attributes
 async function searchTracks(mood, userSeeds, accessToken) {
