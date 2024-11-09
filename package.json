@@ -4,7 +4,7 @@
   "description": "Mood-based Spotify playlist generator",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node api/index.js"
   },
   "dependencies": {
     "ejs": "^3.1.6",
