@@ -1,0 +1,68 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+.container {
+    text-align: center;
+}
+/* General button styling */
+button {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    margin: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    color: #fff;
+}
+
+/* Happy Mood Button */
+button.happy {
+    background-color: #FFD700; /* Gold */
+}
+button.happy:hover {
+    background-color: #FFA500; /* Orange */
+    color: #fff;
+}
+
+/* Sad Mood Button */
+button.sad {
+    background-color: #87CEEB; /* Light Blue */
+}
+button.sad:hover {
+    background-color: #4682B4; /* Steel Blue */
+    color: #fff;
+}
+
+/* Angry Mood Button */
+button.angry {
+    background-color: #DC143C; /* Crimson */
+}
+button.angry:hover {
+    background-color: #8B0000; /* Dark Red */
+    color: #fff;
+}
+
+/* Chill Mood Button */
+button.chill {
+    background-color: #8be78b; /* Pale Green */
+}
+button.chill:hover {
+    background-color: #8FBC8F; /* Dark Sea Green */
+    color: #fff;
+}
+
+/* Energetic Mood Button */
+button.energetic {
+    background-color: #800080; /* Purple */
+}
+button.energetic:hover {
+    background-color: #4B0082; /* Indigo */
+    color: #fff;
+}
