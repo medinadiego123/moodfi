@@ -1,6 +1,5 @@
 const express = require('express');
 const session = require('express-session');
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const path = require('path');
 
 const app = express();
@@ -9,6 +8,12 @@ const CLIENT_ID = '396494146c974c8eb1102bf96c2e463c';
 const CLIENT_SECRET = 'ef8dc3565d894e6ca661fd679321fe4e';
 const REDIRECT_URI = 'https://moodfi.vercel.app/callback';
 const SCOPES = 'user-top-read playlist-modify-public playlist-modify-private';
+
+// Helper function for dynamic import of fetch
+async function fetchWithDynamicImport(url, options) {
+    const fetch = (await import('node-fetch')).default;
+    return fetch(url, options);
+}
 
 app.use(session({
     secret: 'your_secret_key',
@@ -39,7 +44,7 @@ app.get('/callback', async (req, res) => {
     const mood = req.query.state || '';
 
     try {
-        const response = await fetch('https://accounts.spotify.com/api/token', {
+        const response = await fetchWithDynamicImport('https://accounts.spotify.com/api/token', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -94,7 +99,7 @@ app.get('/generate', async (req, res) => {
 
 // Helper function to refresh the access token if needed
 async function refreshAccessToken(refreshToken) {
-    const response = await fetch('https://accounts.spotify.com/api/token', {
+    const response = await fetchWithDynamicImport('https://accounts.spotify.com/api/token', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -118,10 +123,10 @@ async function refreshAccessToken(refreshToken) {
 async function getUserTopArtistsAndTracks(accessToken) {
     try {
         const [topArtistsResponse, topTracksResponse] = await Promise.all([
-            fetch(`https://api.spotify.com/v1/me/top/artists?limit=5`, {
+            fetchWithDynamicImport(`https://api.spotify.com/v1/me/top/artists?limit=5`, {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             }),
-            fetch(`https://api.spotify.com/v1/me/top/tracks?limit=5`, {
+            fetchWithDynamicImport(`https://api.spotify.com/v1/me/top/tracks?limit=5`, {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             })
         ]);
@@ -140,14 +145,12 @@ async function getUserTopArtistsAndTracks(accessToken) {
 async function searchTracks(mood, userSeeds, accessToken) {
     let params = {};
 
-    // If the user has listening history, use personalized seeds
     if (userSeeds.topArtists.length > 0 || userSeeds.topTracks.length > 0) {
         const shuffledArtists = userSeeds.topArtists.sort(() => 0.5 - Math.random()).slice(0, 2).join(',');
         const shuffledTracks = userSeeds.topTracks.sort(() => 0.5 - Math.random()).slice(0, 2).join(',');
         params.seed_artists = shuffledArtists;
         params.seed_tracks = shuffledTracks;
     } else {
-        // For new users, use specific genres to create a random playlist based on mood
         const moodGenres = {
             happy: ['pop', 'indie-pop', 'funk', 'soul', 'disco', 'hyperpop'],
             sad: ['shoegaze', 'folk', 'acoustic', 'singer-songwriter', 'melancholia', 'blues'],
@@ -158,7 +161,6 @@ async function searchTracks(mood, userSeeds, accessToken) {
         params.seed_genres = moodGenres[mood].sort(() => 0.5 - Math.random()).slice(0, 3).join(',');
     }
 
-    // Fine-tune attributes based on mood to ensure appropriate vibe
     switch (mood) {
         case 'happy':
             Object.assign(params, { min_valence: 0.7, min_energy: 0.6, min_tempo: 110, max_tempo: 150, min_danceability: 0.6 });
@@ -191,7 +193,7 @@ async function searchTracks(mood, userSeeds, accessToken) {
 // Create a new playlist in Spotify
 async function createPlaylist(name, accessToken) {
     const userId = await getUserId(accessToken);
-    const response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+    const response = await fetchWithDynamicImport(`https://api.spotify.com/v1/users/${userId}/playlists`, {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${accessToken}`,
@@ -205,7 +207,7 @@ async function createPlaylist(name, accessToken) {
 
 // Get Spotify user ID
 async function getUserId(accessToken) {
-    const response = await fetch(`https://api.spotify.com/v1/me`, {
+    const response = await fetchWithDynamicImport(`https://api.spotify.com/v1/me`, {
         headers: { 'Authorization': `Bearer ${accessToken}` }
     });
     const data = await response.json();
@@ -214,7 +216,7 @@ async function getUserId(accessToken) {
 
 // Add tracks to Spotify playlist
 async function addTracksToPlaylist(playlistId, trackUris, accessToken) {
-    await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+    await fetchWithDynamicImport(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ uris: trackUris })
