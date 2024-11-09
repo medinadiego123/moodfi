@@ -12,10 +12,14 @@ const REDIRECT_URI = process.env.REDIRECT_URI || 'https://moodfi.vercel.app/call
 const SCOPES = 'user-top-read playlist-modify-public playlist-modify-private';
 
 app.use(session({
-    secret: process.env.SESSION_SECRET, // Secure session with a secret from .env
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: process.env.NODE_ENV === 'production' } // Secure cookie only in production
+    cookie: { 
+        secure: process.env.NODE_ENV === 'production', // true in production for HTTPS
+        httpOnly: true, // to prevent client-side access to cookies
+        maxAge: 3600000 // Set maxAge if needed, e.g., 1 hour
+    }
 }));
 
 
@@ -69,6 +73,8 @@ app.get('/callback', async (req, res) => {
             console.log("Access Token Received:", data.access_token);
             req.session.accessToken = data.access_token;
             req.session.refreshToken = data.refresh_token;
+            console.log("Session after saving token:", req.session);  // Debugging line
+
             res.redirect(`/generate?mood=${mood}`);
         } else {
             console.error("Failed to obtain access token:", data);
@@ -85,12 +91,11 @@ app.get('/generate', async (req, res) => {
     const accessToken = req.session.accessToken;
     const mood = req.query.mood;
 
-    // Redirect to login if access token is missing
     if (!accessToken) {
         console.error("Access Token is missing. Redirecting to login.");
         return res.redirect('/login');
     }
-    
+
     console.log("Generating playlist with access token:", accessToken);
 
     try {
@@ -115,6 +120,7 @@ app.get('/generate', async (req, res) => {
         res.send('Error generating playlist: ' + error.message);
     }
 });
+
 
 // Helper function to refresh the access token if needed
 async function refreshAccessToken(refreshToken) {
