@@ -1,12 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-
-// Helper function for dynamic import of fetch
-async function fetchWithDynamicImport(url, options) {
-    const fetch = (await import('node-fetch')).default;
-    return fetch(url, options);
-}
+const path = require('path');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -22,8 +17,12 @@ app.use(session({
     cookie: { secure: false }
 }));
 
+// Set up EJS as the view engine and point to the correct views directory
 app.set('view engine', 'ejs');
-app.use(express.static('public'));
+app.set('views', path.join(__dirname, '../views')); // Adjusted path for views folder
+
+// Serve static files from the public folder
+app.use(express.static(path.join(__dirname, '../public'))); // Adjusted path for public folder
 
 // Render the homepage
 app.get('/', (req, res) => {
@@ -164,53 +163,22 @@ async function searchTracks(mood, userSeeds, accessToken) {
     // Fine-tune attributes based on mood to ensure appropriate vibe
     switch (mood) {
         case 'happy':
-            Object.assign(params, {
-                min_valence: 0.7,
-                min_energy: 0.6,
-                min_tempo: 110,
-                max_tempo: 150,
-                min_danceability: 0.6
-            });
+            Object.assign(params, { min_valence: 0.7, min_energy: 0.6, min_tempo: 110, max_tempo: 150, min_danceability: 0.6 });
             break;
         case 'sad':
-            Object.assign(params, {
-                max_valence: 0.4,
-                max_energy: 0.5,
-                min_acousticness: 0.5,
-                max_tempo: 90,
-                min_instrumentalness: 0.3
-            });
+            Object.assign(params, { max_valence: 0.4, max_energy: 0.5, min_acousticness: 0.5, max_tempo: 90, min_instrumentalness: 0.3 });
             break;
         case 'angry':
-            Object.assign(params, {
-                min_tempo: 130,
-                max_tempo: 180,
-                min_energy: 0.8,
-                max_valence: 0.4,
-                min_loudness: -5
-            });
+            Object.assign(params, { min_tempo: 130, max_tempo: 180, min_energy: 0.8, max_valence: 0.4, min_loudness: -5 });
             break;
         case 'chill':
-            Object.assign(params, {
-                max_tempo: 120,
-                max_energy: 0.5,
-                min_instrumentalness: 0.4,
-                min_acousticness: 0.3,
-                min_valence: 0.3
-            });
+            Object.assign(params, { max_tempo: 120, max_energy: 0.5, min_instrumentalness: 0.4, min_acousticness: 0.3, min_valence: 0.3 });
             break;
         case 'energetic':
-            Object.assign(params, {
-                min_tempo: 120,
-                max_tempo: 160,
-                min_energy: 0.7,
-                min_danceability: 0.7,
-                min_valence: 0.5
-            });
+            Object.assign(params, { min_tempo: 120, max_tempo: 160, min_energy: 0.7, min_danceability: 0.7, min_valence: 0.5 });
             break;
     }
 
-    // Create the query string
     const query = new URLSearchParams(params).toString();
     const url = `https://api.spotify.com/v1/recommendations?${query}&limit=10`;
 
@@ -263,5 +231,5 @@ app.get('/logout', (req, res) => {
     });
 });
 
-// Start server
+// Export the app for Vercel serverless function handling
 module.exports = app;
