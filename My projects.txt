@@ -1,5 +1,0 @@
-1. Web scraping tool (scans ebay, grailed depop etc. for vintage clothing brands under $100)
-
-2. Moodfi (playlist generator based on users mood)
-
-3. Glu? (KDB+ script that monitors users glucose levels in real time) 
