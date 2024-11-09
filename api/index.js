@@ -144,86 +144,77 @@ async function getUserTopArtistsAndTracks(accessToken) {
 
 // Refined `searchTracks` function with user-based seeds and mood attributes
 async function searchTracks(mood, userSeeds, accessToken) {
-    const params = {};
-    let songCount = 10;
-
-    // Determine user type
-    const isExistingUser = userSeeds.topArtists.length > 0 || userSeeds.topTracks.length > 0;
-    const isSemiNewUser = !isExistingUser && userSeeds.recentHistory.length > 0;
-    
-    // Mood genres for fallback
-    const moodGenres = {
-        happy: ['pop', 'indie-pop', 'funk', 'soul', 'disco', 'hyperpop'],
-        sad: ['shoegaze', 'folk', 'acoustic', 'singer-songwriter', 'melancholia', 'blues'],
-        angry: ['metal', 'punk', 'hardcore', 'rock', 'grunge'],
-        chill: ['lo-fi', 'chill', 'ambient', 'jazz', 'soul'],
-        energetic: ['edm', 'dance', 'hip-hop', 'house', 'trap', 'drill']
+    let params = {
+        limit: 10, // Request up to 10 tracks
     };
 
-    // Seed settings for existing users
-    if (isExistingUser) {
-        const shuffledArtists = userSeeds.topArtists.slice(0, 2).join(',');
-        const shuffledTracks = userSeeds.topTracks.slice(0, 2).join(',');
+    // Use user-based seeds if available; otherwise, use genre-based seeds for new users
+    if (userSeeds.topArtists.length > 0 || userSeeds.topTracks.length > 0) {
+        const shuffledArtists = userSeeds.topArtists.sort(() => 0.5 - Math.random()).slice(0, 2).join(',');
+        const shuffledTracks = userSeeds.topTracks.sort(() => 0.5 - Math.random()).slice(0, 2).join(',');
         params.seed_artists = shuffledArtists;
         params.seed_tracks = shuffledTracks;
-    } else if (isSemiNewUser) {
-        params.seed_tracks = userSeeds.recentHistory.slice(0, 3).join(',');
     } else {
-        params.seed_genres = moodGenres[mood].join(',');
+        const moodGenres = {
+            happy: ['pop', 'indie-pop', 'funk', 'soul', 'disco', 'hyperpop', 'dance'],
+            sad: ['shoegaze', 'folk', 'acoustic', 'singer-songwriter', 'melancholia', 'blues', 'ambient'],
+            angry: ['metal', 'punk', 'hardcore', 'rock', 'grunge', 'rap', 'drum-and-bass'],
+            chill: ['lo-fi', 'chill', 'ambient', 'jazz', 'soul', 'r-n-b'],
+            energetic: ['edm', 'dance', 'hip-hop', 'house', 'trap', 'electronic']
+        };
+        params.seed_genres = moodGenres[mood].sort(() => 0.5 - Math.random()).slice(0, 3).join(',');
     }
 
-    // Attributes based on mood
+    // Expanded and relaxed mood-specific attributes
     switch (mood) {
         case 'happy':
             Object.assign(params, {
-                limit: songCount,
-                min_valence: 0.7,
-                min_energy: 0.6,
-                min_tempo: 120,
-                max_tempo: 160,
-                min_danceability: 0.6
+                min_valence: 0.6,
+                min_energy: 0.5,
+                min_danceability: 0.5,
+                max_instrumentalness: 0.4,
+                min_popularity: 30
             });
             break;
         case 'sad':
             Object.assign(params, {
-                limit: songCount,
-                max_valence: 0.4,
-                max_energy: 0.5,
-                min_acousticness: 0.5,
-                max_tempo: 100,
-                min_instrumentalness: 0.3
-            });
-            break;
-        case 'chill':
-            Object.assign(params, {
-                limit: songCount,
-                max_tempo: 110,
-                max_energy: 0.5,
-                min_acousticness: 0.4,
-                min_instrumentalness: 0.3
-            });
-            break;
-        case 'energetic':
-            Object.assign(params, {
-                limit: songCount,
-                min_energy: 0.7,
-                min_tempo: 130,
-                min_danceability: 0.7,
-                max_valence: 0.7
+                max_valence: 0.5,
+                min_acousticness: 0.2, // Further relaxed
+                max_energy: 0.6,
+                max_danceability: 0.5,
+                max_popularity: 80 // Higher to allow broader selection
             });
             break;
         case 'angry':
             Object.assign(params, {
-                limit: songCount,
-                min_loudness: -5,
-                min_energy: 0.8,
+                min_energy: 0.7,
+                min_loudness: -8,
                 max_valence: 0.4,
-                min_tempo: 140
+                max_acousticness: 0.2,
+                min_tempo: 120,
+                max_popularity: 70
+            });
+            break;
+        case 'chill':
+            Object.assign(params, {
+                max_energy: 0.4, // Lower to match the "Chill" vibe
+                min_acousticness: 0.2, // Further relaxed
+                max_danceability: 0.6,
+                max_valence: 0.5,
+                min_popularity: 20
+            });
+            break;
+        case 'energetic':
+            Object.assign(params, {
+                min_energy: 0.7,
+                min_danceability: 0.6,
+                min_valence: 0.5,
+                max_acousticness: 0.3,
+                min_popularity: 40
             });
             break;
     }
 
-    // Fetch recommended tracks
     const query = new URLSearchParams(params).toString();
     const url = `https://api.spotify.com/v1/recommendations?${query}`;
 
@@ -231,36 +222,34 @@ async function searchTracks(mood, userSeeds, accessToken) {
         const response = await fetchWithDynamicImport(url, {
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
-        const data = await response.json();
+        let data = await response.json();
 
-        // If not enough tracks, add fallback genres
-        if (data.tracks.length < songCount) {
-            const additionalTracks = await fetchAdditionalTracks(moodGenres[mood], songCount - data.tracks.length, accessToken);
-            return data.tracks.concat(additionalTracks);
+        let tracks = data.tracks;
+
+        // Retry logic to fetch more tracks if fewer than 10 are received
+        while (tracks.length < 10) {
+            console.log(`Only ${tracks.length} tracks received, fetching more...`);
+            
+            // Adjust parameters to increase track count for next fetch
+            if (mood === 'sad') {
+                params.min_popularity = Math.max(params.min_popularity - 10, 10); // Gradually lower popularity restriction
+                params.max_valence += 0.1; // Relax the valence filter slightly
+            } else if (mood === 'chill') {
+                params.max_energy += 0.1; // Relax energy for broader chill options
+            }
+
+            const retryResponse = await fetchWithDynamicImport(url, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            const retryData = await retryResponse.json();
+            tracks = tracks.concat(retryData.tracks).slice(0, 10); // Keep only up to 10 tracks
         }
 
-        return data.tracks;
+        return tracks;
     } catch (error) {
-        console.error("Error fetching recommendations:", error);
-        return [];
+        console.error("Error fetching tracks:", error);
+        throw error;
     }
-}
-
-// Fallback to ensure 10 songs for semi-new users
-async function fetchAdditionalTracks(genres, neededCount, accessToken) {
-    const params = {
-        limit: neededCount,
-        seed_genres: genres.join(',')
-    };
-
-    const query = new URLSearchParams(params).toString();
-    const url = `https://api.spotify.com/v1/recommendations?${query}`;
-
-    const response = await fetchWithDynamicImport(url, {
-        headers: { 'Authorization': `Bearer ${accessToken}` }
-    });
-    const data = await response.json();
-    return data.tracks;
 }
 
 // Create a new playlist in Spotify
