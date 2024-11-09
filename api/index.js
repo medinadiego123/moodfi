@@ -72,31 +72,37 @@ app.get('/generate', async (req, res) => {
     const accessToken = req.session.accessToken;
     const mood = req.query.mood;
 
+    // Redirect to login if access token is missing
     if (!accessToken) {
-        console.error("Access Token is missing.");
+        console.error("Access Token is missing. Redirecting to login.");
         return res.redirect('/login');
     }
+    
     console.log("Generating playlist with access token:", accessToken);
 
     try {
         const userSeeds = await getUserTopArtistsAndTracks(accessToken);
-        console.log("User Seeds Retrieved:", userSeeds);
+
+        // Ensure userSeeds properties are defined
+        userSeeds.topArtists = userSeeds.topArtists || [];
+        userSeeds.topTracks = userSeeds.topTracks || [];
+        console.log("User Seeds:", userSeeds);
 
         const recommendations = await searchTracks(mood, userSeeds, accessToken);
-        console.log("Track Recommendations Retrieved:", recommendations);
+        console.log("Recommendations:", recommendations);
 
         const trackUris = recommendations.map(track => track.uri);
         const playlistName = `Moodfi - ${mood.charAt(0).toUpperCase() + mood.slice(1)} Playlist`;
         const playlistId = await createPlaylist(playlistName, accessToken);
-
         await addTracksToPlaylist(playlistId, trackUris, accessToken);
 
         res.redirect(`https://open.spotify.com/playlist/${playlistId}`);
     } catch (error) {
-        console.error('Error occurred while generating playlist:', error);
-        res.send(`Error generating playlist: ${error.message}`);
+        console.error('Error generating playlist:', error);
+        res.send('Error generating playlist: ' + error.message);
     }
 });
+
 
 // Helper function to refresh the access token if needed
 async function refreshAccessToken(refreshToken) {
@@ -124,131 +130,102 @@ async function refreshAccessToken(refreshToken) {
 async function getUserTopArtistsAndTracks(accessToken) {
     try {
         const [topArtistsResponse, topTracksResponse] = await Promise.all([
-            fetch('https://api.spotify.com/v1/me/top/artists?limit=5', {
+            fetch(`https://api.spotify.com/v1/me/top/artists?limit=5`, {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             }),
-            fetch('https://api.spotify.com/v1/me/top/tracks?limit=5', {
+            fetch(`https://api.spotify.com/v1/me/top/tracks?limit=5`, {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             })
         ]);
 
-        const topArtists = (await topArtistsResponse.json()).items.map(artist => artist.id);
-        const topTracks = (await topTracksResponse.json()).items.map(track => track.id);
+        const topArtistsData = await topArtistsResponse.json();
+        const topTracksData = await topTracksResponse.json();
+
+        const topArtists = topArtistsData.items ? topArtistsData.items.map(artist => artist.id) : [];
+        const topTracks = topTracksData.items ? topTracksData.items.map(track => track.id) : [];
 
         return { topArtists, topTracks };
     } catch (error) {
         console.error('Error retrieving user’s top artists and tracks:', error);
-        throw error;
+        return { topArtists: [], topTracks: [] }; // Return empty arrays on error
     }
 }
 
+
+// Helper function to ensure 10 songs if initial fetch lacks them
+async function fetchAdditionalTracks(genres, requiredCount, accessToken) {
+    let additionalTracks = [];
+    let remainingCount = requiredCount;
+
+    try {
+        while (remainingCount > 0) {
+            const url = `https://api.spotify.com/v1/recommendations?limit=${remainingCount}&seed_genres=${genres.slice(0, 2).join(',')}`;
+            const response = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            const data = await response.json();
+
+            if (Array.isArray(data.tracks) && data.tracks.length > 0) {
+                additionalTracks = additionalTracks.concat(data.tracks);
+                remainingCount -= data.tracks.length;
+            } else {
+                console.warn("No additional tracks found in response.");
+                break;
+            }
+        }
+
+        return additionalTracks.slice(0, requiredCount);
+    } catch (error) {
+        console.error("Error fetching additional tracks:", error);
+        return [];
+    }
+}
+
+
 // Refined `searchTracks` function with user-based seeds and mood attributes
 async function searchTracks(mood, userSeeds, accessToken) {
-    let params = {
-        limit: 10, // Request up to 10 tracks
+    const params = { limit: 10 }; // Set the song count to 10 globally
+
+    // Determine user type
+    const isExistingUser = userSeeds.topArtists.length > 0 || userSeeds.topTracks.length > 0;
+
+    // Mood genres for fallback
+    const moodGenres = {
+        happy: ['pop', 'indie-pop', 'funk', 'soul', 'disco'],
+        sad: ['shoegaze', 'folk', 'acoustic', 'melancholia'],
+        angry: ['metal', 'punk', 'hardcore', 'rock'],
+        chill: ['lo-fi', 'ambient', 'jazz', 'soul'],
+        energetic: ['edm', 'dance', 'hip-hop', 'house']
     };
 
-    // Use user-based seeds if available; otherwise, use genre-based seeds for new users
-    if (userSeeds.topArtists.length > 0 || userSeeds.topTracks.length > 0) {
-        const shuffledArtists = userSeeds.topArtists.sort(() => 0.5 - Math.random()).slice(0, 2).join(',');
-        const shuffledTracks = userSeeds.topTracks.sort(() => 0.5 - Math.random()).slice(0, 2).join(',');
-        params.seed_artists = shuffledArtists;
-        params.seed_tracks = shuffledTracks;
+    // Seed settings based on user type
+    if (isExistingUser) {
+        params.seed_artists = userSeeds.topArtists.slice(0, 2).join(',');
+        params.seed_tracks = userSeeds.topTracks.slice(0, 2).join(',');
     } else {
-        const moodGenres = {
-            happy: ['pop', 'indie-pop', 'funk', 'soul', 'disco', 'hyperpop', 'dance'],
-            sad: ['shoegaze', 'folk', 'acoustic', 'singer-songwriter', 'melancholia', 'blues', 'ambient'],
-            angry: ['metal', 'punk', 'hardcore', 'rock', 'grunge', 'rap', 'drum-and-bass'],
-            chill: ['lo-fi', 'chill', 'ambient', 'jazz', 'soul', 'r-n-b'],
-            energetic: ['edm', 'dance', 'hip-hop', 'house', 'trap', 'electronic']
-        };
-        params.seed_genres = moodGenres[mood].sort(() => 0.5 - Math.random()).slice(0, 3).join(',');
-    }
-
-    // Expanded and relaxed mood-specific attributes
-    switch (mood) {
-        case 'happy':
-            Object.assign(params, {
-                min_valence: 0.6,
-                min_energy: 0.5,
-                min_danceability: 0.5,
-                max_instrumentalness: 0.4,
-                min_popularity: 30
-            });
-            break;
-        case 'sad':
-            Object.assign(params, {
-                max_valence: 0.5,
-                min_acousticness: 0.2, // Further relaxed
-                max_energy: 0.6,
-                max_danceability: 0.5,
-                max_popularity: 80 // Higher to allow broader selection
-            });
-            break;
-        case 'angry':
-            Object.assign(params, {
-                min_energy: 0.7,
-                min_loudness: -8,
-                max_valence: 0.4,
-                max_acousticness: 0.2,
-                min_tempo: 120,
-                max_popularity: 70
-            });
-            break;
-        case 'chill':
-            Object.assign(params, {
-                max_energy: 0.4, // Lower to match the "Chill" vibe
-                min_acousticness: 0.2, // Further relaxed
-                max_danceability: 0.6,
-                max_valence: 0.5,
-                min_popularity: 20
-            });
-            break;
-        case 'energetic':
-            Object.assign(params, {
-                min_energy: 0.7,
-                min_danceability: 0.6,
-                min_valence: 0.5,
-                max_acousticness: 0.3,
-                min_popularity: 40
-            });
-            break;
+        params.seed_genres = moodGenres[mood].slice(0, 2).join(',');
     }
 
     const query = new URLSearchParams(params).toString();
     const url = `https://api.spotify.com/v1/recommendations?${query}`;
 
     try {
-        const response = await fetchWithDynamicImport(url, {
+        const response = await fetch(url, {
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
-        let data = await response.json();
+        const data = await response.json();
 
-        let tracks = data.tracks;
-
-        // Retry logic to fetch more tracks if fewer than 10 are received
-        while (tracks.length < 10) {
-            console.log(`Only ${tracks.length} tracks received, fetching more...`);
-            
-            // Adjust parameters to increase track count for next fetch
-            if (mood === 'sad') {
-                params.min_popularity = Math.max(params.min_popularity - 10, 10); // Gradually lower popularity restriction
-                params.max_valence += 0.1; // Relax the valence filter slightly
-            } else if (mood === 'chill') {
-                params.max_energy += 0.1; // Relax energy for broader chill options
-            }
-
-            const retryResponse = await fetchWithDynamicImport(url, {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            });
-            const retryData = await retryResponse.json();
-            tracks = tracks.concat(retryData.tracks).slice(0, 10); // Keep only up to 10 tracks
+        // Ensure data.tracks is an array and has at least 10 tracks
+        if (!Array.isArray(data.tracks) || data.tracks.length < 10) {
+            console.warn(`Only ${data.tracks ? data.tracks.length : 0} tracks found. Fetching more.`);
+            const additionalTracks = await fetchAdditionalTracks(moodGenres[mood], 10 - (data.tracks ? data.tracks.length : 0), accessToken);
+            return (data.tracks || []).concat(additionalTracks).slice(0, 10);
         }
 
-        return tracks;
+        return data.tracks.slice(0, 10);
     } catch (error) {
-        console.error("Error fetching tracks:", error);
-        throw error;
+        console.error("Error fetching recommendations:", error);
+        return [];
     }
 }
 
