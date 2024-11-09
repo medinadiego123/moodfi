@@ -7,7 +7,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 const CLIENT_ID = '396494146c974c8eb1102bf96c2e463c';
 const CLIENT_SECRET = 'ef8dc3565d894e6ca661fd679321fe4e';
-const REDIRECT_URI = 'http://localhost:3000/callback';
+const REDIRECT_URI = 'https://moodfi.vercel.app/callback';
 const SCOPES = 'user-top-read playlist-modify-public playlist-modify-private';
 
 app.use(session({
@@ -19,10 +19,10 @@ app.use(session({
 
 // Set up EJS as the view engine and point to the correct views directory
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '../views')); // Adjusted path for views folder
+app.set('views', path.join(__dirname, 'views')); // Updated path for views folder
 
 // Serve static files from the public folder
-app.use(express.static(path.join(__dirname, '../public'))); // Adjusted path for public folder
+app.use(express.static(path.join(__dirname, 'public'))); // Updated path for public folder
 
 // Render the homepage
 app.get('/', (req, res) => {
