@@ -12,12 +12,11 @@ const REDIRECT_URI = process.env.REDIRECT_URI || 'https://moodfi.vercel.app/call
 const SCOPES = 'user-top-read playlist-modify-public playlist-modify-private';
 
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET, // Secure session with a secret from .env
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true, sameSite: 'lax' }
+    cookie: { secure: process.env.NODE_ENV === 'production' } // Secure cookie only in production
 }));
-
 
 
 // Set up EJS as the view engine and point to the correct views directory
