@@ -19,10 +19,8 @@ app.use(session({
 
 // Set up EJS as the view engine and point to the correct views directory
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views')); // Updated path for views folder
-
-// Serve static files from the public folder
-app.use(express.static(path.join(__dirname, 'public'))); // Updated path for public folder
+app.set('views', path.join(__dirname, '../views'));
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Render the homepage
 app.get('/', (req, res) => {
