@@ -9,7 +9,7 @@ async function fetchWithDynamicImport(url, options) {
 }
 
 const app = express();
-const PORT = 3000;
+const port = process.env.PORT || 3000;
 const CLIENT_ID = '396494146c974c8eb1102bf96c2e463c';
 const CLIENT_SECRET = 'ef8dc3565d894e6ca661fd679321fe4e';
 const REDIRECT_URI = 'http://localhost:3000/callback';
@@ -264,4 +264,6 @@ app.get('/logout', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
