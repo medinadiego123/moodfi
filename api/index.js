@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('express-session');
+const fetch = require('node-fetch');
 const path = require('path');
 
 const app = express();
@@ -8,12 +9,6 @@ const CLIENT_ID = '396494146c974c8eb1102bf96c2e463c';
 const CLIENT_SECRET = 'ef8dc3565d894e6ca661fd679321fe4e';
 const REDIRECT_URI = 'https://moodfi.vercel.app/callback';
 const SCOPES = 'user-top-read playlist-modify-public playlist-modify-private';
-
-// Helper function for dynamic import of fetch
-async function fetchWithDynamicImport(url, options) {
-    const fetch = (await import('node-fetch')).default;
-    return fetch(url, options);
-}
 
 app.use(session({
     secret: 'your_secret_key',
@@ -24,12 +19,12 @@ app.use(session({
 
 // Set up EJS as the view engine and point to the correct views directory
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '../views'));
+app.set('views', path.join(__dirname, '../views')); // Make sure the path is correct
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Render the homepage
 app.get('/', (req, res) => {
-    res.render('index');
+    res.render('index'); // Renders `index.ejs` in the `views` folder
 });
 
 // Spotify authorization login route
@@ -44,7 +39,7 @@ app.get('/callback', async (req, res) => {
     const mood = req.query.state || '';
 
     try {
-        const response = await fetchWithDynamicImport('https://accounts.spotify.com/api/token', {
+        const response = await fetch('https://accounts.spotify.com/api/token', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -58,8 +53,8 @@ app.get('/callback', async (req, res) => {
         });
 
         const data = await response.json();
-
         if (data.access_token) {
+            console.log("Access Token Received:", data.access_token);
             req.session.accessToken = data.access_token;
             req.session.refreshToken = data.refresh_token;
             res.redirect(`/generate?mood=${mood}`);
@@ -78,28 +73,34 @@ app.get('/generate', async (req, res) => {
     const mood = req.query.mood;
 
     if (!accessToken) {
+        console.error("Access Token is missing.");
         return res.redirect('/login');
     }
+    console.log("Generating playlist with access token:", accessToken);
 
     try {
         const userSeeds = await getUserTopArtistsAndTracks(accessToken);
+        console.log("User Seeds Retrieved:", userSeeds);
+
         const recommendations = await searchTracks(mood, userSeeds, accessToken);
+        console.log("Track Recommendations Retrieved:", recommendations);
 
         const trackUris = recommendations.map(track => track.uri);
         const playlistName = `Moodfi - ${mood.charAt(0).toUpperCase() + mood.slice(1)} Playlist`;
         const playlistId = await createPlaylist(playlistName, accessToken);
+
         await addTracksToPlaylist(playlistId, trackUris, accessToken);
 
         res.redirect(`https://open.spotify.com/playlist/${playlistId}`);
     } catch (error) {
-        console.error('Error generating playlist:', error);
-        res.send('Error generating playlist: ' + error.message);
+        console.error('Error occurred while generating playlist:', error);
+        res.send(`Error generating playlist: ${error.message}`);
     }
 });
 
 // Helper function to refresh the access token if needed
 async function refreshAccessToken(refreshToken) {
-    const response = await fetchWithDynamicImport('https://accounts.spotify.com/api/token', {
+    const response = await fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -123,10 +124,10 @@ async function refreshAccessToken(refreshToken) {
 async function getUserTopArtistsAndTracks(accessToken) {
     try {
         const [topArtistsResponse, topTracksResponse] = await Promise.all([
-            fetchWithDynamicImport(`https://api.spotify.com/v1/me/top/artists?limit=5`, {
+            fetch('https://api.spotify.com/v1/me/top/artists?limit=5', {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             }),
-            fetchWithDynamicImport(`https://api.spotify.com/v1/me/top/tracks?limit=5`, {
+            fetch('https://api.spotify.com/v1/me/top/tracks?limit=5', {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             })
         ]);
@@ -182,7 +183,7 @@ async function searchTracks(mood, userSeeds, accessToken) {
     const query = new URLSearchParams(params).toString();
     const url = `https://api.spotify.com/v1/recommendations?${query}&limit=10`;
 
-    const response = await fetchWithDynamicImport(url, {
+    const response = await fetch(url, {
         headers: { 'Authorization': `Bearer ${accessToken}` }
     });
 
@@ -193,7 +194,7 @@ async function searchTracks(mood, userSeeds, accessToken) {
 // Create a new playlist in Spotify
 async function createPlaylist(name, accessToken) {
     const userId = await getUserId(accessToken);
-    const response = await fetchWithDynamicImport(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+    const response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${accessToken}`,
@@ -207,7 +208,7 @@ async function createPlaylist(name, accessToken) {
 
 // Get Spotify user ID
 async function getUserId(accessToken) {
-    const response = await fetchWithDynamicImport(`https://api.spotify.com/v1/me`, {
+    const response = await fetch(`https://api.spotify.com/v1/me`, {
         headers: { 'Authorization': `Bearer ${accessToken}` }
     });
     const data = await response.json();
@@ -216,7 +217,7 @@ async function getUserId(accessToken) {
 
 // Add tracks to Spotify playlist
 async function addTracksToPlaylist(playlistId, trackUris, accessToken) {
-    await fetchWithDynamicImport(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+    await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ uris: trackUris })
