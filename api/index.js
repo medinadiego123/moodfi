@@ -9,20 +9,21 @@ const port = process.env.PORT || 3000;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI || 'https://moodfi.vercel.app/callback';
+const SESSION_SECRET = process.env.SESSION_SECRET;
 const SCOPES = 'user-top-read playlist-modify-public playlist-modify-private';
 
+
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { 
-        secure: process.env.NODE_ENV === 'production', // true in production for HTTPS
-        httpOnly: true, // to prevent client-side access to cookies
-        maxAge: 3600000 // Set maxAge if needed, e.g., 1 hour
+    cookie: {
+      secure: process.env.NODE_ENV === 'production', // Secure cookies only in production
+      maxAge: 24 * 60 * 60 * 1000 // Set max age to 1 day or adjust as needed
     }
-}));
+  }));
 
-
+  
 // Set up EJS as the view engine and point to the correct views directory
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views')); // Make sure the path is correct
@@ -41,14 +42,13 @@ app.get('/login', (req, res) => {
 });
 // Callback route to get access token
 app.get('/callback', async (req, res) => {
-    const code = req.query.code || null;
+    const code = req.query.code;
     const mood = req.query.state || '';
-
-    console.log("Code received:", code);  // Debugging
-    console.log("Mood received:", mood);  // Debugging
+    console.log("Callback received. Code:", code);
+    console.log("Mood received:", mood);
 
     if (!code) {
-        console.error("Authorization code missing. Redirecting to /login.");
+        console.log('Authorization code is missing. Redirecting to /login.');
         return res.redirect('/login');
     }
 
@@ -67,25 +67,23 @@ app.get('/callback', async (req, res) => {
         });
 
         const data = await response.json();
-        console.log("Data received from Spotify token request:", data); // Debugging log
+        console.log("Spotify token response:", data);
 
         if (data.access_token) {
-            console.log("Access Token Received:", data.access_token);
             req.session.accessToken = data.access_token;
             req.session.refreshToken = data.refresh_token;
-            console.log("Session after saving token:", req.session);  // Debugging line
+            req.session.save();
 
             res.redirect(`/generate?mood=${mood}`);
         } else {
             console.error("Failed to obtain access token:", data);
-            throw new Error('Failed to obtain access token');
+            res.send('Authorization failed: Unable to obtain access token');
         }
     } catch (error) {
         console.error('Error during Spotify authorization:', error);
         res.send('Authorization error');
     }
 });
-
 // Route to generate a playlist
 app.get('/generate', async (req, res) => {
     const accessToken = req.session.accessToken;
@@ -109,6 +107,11 @@ app.get('/generate', async (req, res) => {
         const recommendations = await searchTracks(mood, userSeeds, accessToken);
         console.log("Recommendations:", recommendations);
 
+        if (recommendations.length === 0) {
+            console.error("No recommendations found, redirecting to /");
+            return res.redirect('/');
+        }
+
         const trackUris = recommendations.map(track => track.uri);
         const playlistName = `Moodfi - ${mood.charAt(0).toUpperCase() + mood.slice(1)} Playlist`;
         const playlistId = await createPlaylist(playlistName, accessToken);
@@ -120,7 +123,6 @@ app.get('/generate', async (req, res) => {
         res.send('Error generating playlist: ' + error.message);
     }
 });
-
 
 // Helper function to refresh the access token if needed
 async function refreshAccessToken(refreshToken) {
