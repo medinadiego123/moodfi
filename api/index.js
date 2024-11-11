@@ -1,31 +1,20 @@
 require('dotenv').config();
 const express = require('express');
-const session = require('express-session');
 const fetch = require('node-fetch');
 const path = require('path');
+const cookieParser = require('cookie-parser'); // Import cookie-parser for handling cookies
+const jwt = require('jsonwebtoken'); // Import jsonwebtoken for JWT handling
 
 const app = express();
 const port = process.env.PORT || 3000;
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI || 'https://moodfi.vercel.app/callback';
-const SESSION_SECRET = process.env.SESSION_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET;
 const SCOPES = 'user-top-read playlist-modify-public playlist-modify-private';
 
+app.use(cookieParser());
 
-app.use(session({
-    secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false, // Only save session if modified
-    cookie: {
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
-        sameSite: "none"
-    }
-}));
-
-
-  
 // Set up EJS as the view engine and point to the correct views directory
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views')); // Make sure the path is correct
@@ -47,7 +36,6 @@ app.get('/callback', async (req, res) => {
     const code = req.query.code;
     const mood = req.query.state || '';
     console.log("Callback received. Code:", code);
-    console.log("Mood received:", mood);
 
     if (!code) {
         console.log('Authorization code is missing. Redirecting to /login.');
@@ -72,16 +60,21 @@ app.get('/callback', async (req, res) => {
         console.log("Spotify token response:", data);
 
         if (data.access_token) {
-            req.session.accessToken = data.access_token;
-            req.session.refreshToken = data.refresh_token;
-            req.session.save((err) => {
-                if (err) {
-                    console.error("Error saving session:", err);
-                    return res.send('Session error');
-                }
-                console.log("Access token saved to session:", req.session.accessToken);
-                res.redirect(`/generate?mood=${mood}`);
-            });
+            // Create a JWT containing the Spotify access and refresh tokens
+            const token = jwt.sign(
+                {
+                    accessToken: data.access_token,
+                    refreshToken: data.refresh_token
+                },
+                process.env.JWT_SECRET,
+                { expiresIn: '1h' } // Set expiration as needed
+            );
+
+            // Send the JWT as a cookie to the client
+            res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+            console.log("JWT sent as cookie");
+
+            res.redirect(`/generate?mood=${mood}`);
         } else {
             console.error("Failed to obtain access token:", data);
             res.send('Authorization failed: Unable to obtain access token');
@@ -93,31 +86,25 @@ app.get('/callback', async (req, res) => {
 });
 // Route to generate a playlist
 app.get('/generate', async (req, res) => {
-    let accessToken = req.session.accessToken;
     const mood = req.query.mood;
 
-    if (!accessToken) {
-        console.log("Access Token is missing. Attempting to refresh.");
-        // Check if there's a refresh token available to get a new access token
-        if (req.session.refreshToken) {
-            try {
-                accessToken = await refreshAccessToken(req.session.refreshToken);
-                req.session.accessToken = accessToken;
-                req.session.save((err) => {
-                    if (err) {
-                        console.error("Error saving session after refreshing token:", err);
-                        return res.redirect('/login'); // Redirect to login if saving fails
-                    }
-                });
-                console.log("Refreshed access token:", accessToken);
-            } catch (error) {
-                console.error("Error refreshing access token:", error);
-                return res.redirect('/login'); // Redirect to login if refreshing fails
-            }
-        } else {
-            console.error("No refresh token available. Redirecting to login.");
-            return res.redirect('/login');
-        }
+    // Get the JWT from the cookie
+    const token = req.cookies.token;
+    if (!token) {
+        console.error("JWT is missing. Redirecting to login.");
+        return res.redirect('/login');
+    }
+
+    let accessToken, refreshToken;
+
+    try {
+        // Verify and decode the JWT
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        accessToken = decoded.accessToken;
+        refreshToken = decoded.refreshToken;
+    } catch (error) {
+        console.error("Error verifying JWT:", error);
+        return res.redirect('/login'); // Redirect to login if JWT is invalid or expired
     }
 
     console.log("Generating playlist with access token:", accessToken);
