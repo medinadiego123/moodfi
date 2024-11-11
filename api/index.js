@@ -18,10 +18,12 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // Secure cookies only in production
-      maxAge: 24 * 60 * 60 * 1000 // Set max age to 1 day or adjust as needed
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000,
+        sameSite: "none"
     }
-  }));
+}));
+
 
   
 // Set up EJS as the view engine and point to the correct views directory
@@ -72,9 +74,14 @@ app.get('/callback', async (req, res) => {
         if (data.access_token) {
             req.session.accessToken = data.access_token;
             req.session.refreshToken = data.refresh_token;
-            req.session.save();
-
-            res.redirect(`/generate?mood=${mood}`);
+            req.session.save((err) => {
+                if (err) {
+                    console.error("Error saving session:", err);
+                    return res.send('Session error');
+                }
+                console.log("Access token saved to session:", req.session.accessToken);
+                res.redirect(`/generate?mood=${mood}`);
+            });
         } else {
             console.error("Failed to obtain access token:", data);
             res.send('Authorization failed: Unable to obtain access token');
