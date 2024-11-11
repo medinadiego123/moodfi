@@ -16,10 +16,10 @@ const SCOPES = 'user-top-read playlist-modify-public playlist-modify-private';
 app.use(session({
     secret: SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false, // Only save session if modified
     cookie: {
         secure: process.env.NODE_ENV === 'production',
-        maxAge: 24 * 60 * 60 * 1000,
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
         sameSite: "none"
     }
 }));
@@ -93,12 +93,31 @@ app.get('/callback', async (req, res) => {
 });
 // Route to generate a playlist
 app.get('/generate', async (req, res) => {
-    const accessToken = req.session.accessToken;
+    let accessToken = req.session.accessToken;
     const mood = req.query.mood;
 
     if (!accessToken) {
-        console.error("Access Token is missing. Redirecting to login.");
-        return res.redirect('/login');
+        console.log("Access Token is missing. Attempting to refresh.");
+        // Check if there's a refresh token available to get a new access token
+        if (req.session.refreshToken) {
+            try {
+                accessToken = await refreshAccessToken(req.session.refreshToken);
+                req.session.accessToken = accessToken;
+                req.session.save((err) => {
+                    if (err) {
+                        console.error("Error saving session after refreshing token:", err);
+                        return res.redirect('/login'); // Redirect to login if saving fails
+                    }
+                });
+                console.log("Refreshed access token:", accessToken);
+            } catch (error) {
+                console.error("Error refreshing access token:", error);
+                return res.redirect('/login'); // Redirect to login if refreshing fails
+            }
+        } else {
+            console.error("No refresh token available. Redirecting to login.");
+            return res.redirect('/login');
+        }
     }
 
     console.log("Generating playlist with access token:", accessToken);
