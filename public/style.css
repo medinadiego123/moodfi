@@ -10,6 +10,7 @@ body {
 .container {
     text-align: center;
 }
+
 /* General button styling */
 button {
     padding: 15px 30px;
@@ -24,7 +25,7 @@ button {
 
 /* Happy Mood Button */
 button.happy {
-    background-color: #FFD700; /* Gold */
+    background-color: #DAA520; /* Goldenrod */
 }
 button.happy:hover {
     background-color: #FFA500; /* Orange */
@@ -33,7 +34,7 @@ button.happy:hover {
 
 /* Sad Mood Button */
 button.sad {
-    background-color: #87CEEB; /* Light Blue */
+    background-color: #5DADE2; /* Moderate Blue */
 }
 button.sad:hover {
     background-color: #4682B4; /* Steel Blue */
@@ -51,7 +52,7 @@ button.angry:hover {
 
 /* Chill Mood Button */
 button.chill {
-    background-color: #8be78b; /* Pale Green */
+    background-color: #66C266; /* Moderate Green */
 }
 button.chill:hover {
     background-color: #8FBC8F; /* Dark Sea Green */
