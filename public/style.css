@@ -25,43 +25,43 @@ button {
 
 /* Happy Mood Button */
 button.happy {
-    background-color: #DAA520; /* Goldenrod */
+    background-color: #C68600; /* Darker Gold */
 }
 button.happy:hover {
-    background-color: #FFA500; /* Orange */
+    background-color: #A56600; /* Darker Orange */
     color: #fff;
 }
 
 /* Sad Mood Button */
 button.sad {
-    background-color: #5DADE2; /* Moderate Blue */
+    background-color: #5A9BD5; /* Darker Blue */
 }
 button.sad:hover {
-    background-color: #4682B4; /* Steel Blue */
+    background-color: #2C78C4; /* Even Darker Blue */
+    color: #fff;
+}
+
+/* Chill Mood Button */
+button.chill {
+    background-color: #4A7B4A; /* Darker Green */
+}
+button.chill:hover {
+    background-color: #3C643C; /* Even Darker Green */
     color: #fff;
 }
 
 /* Angry Mood Button */
 button.angry {
-    background-color: #DC143C; /* Crimson */
+    background-color: #DC143C; /* Crimson (contrast-checked) */
 }
 button.angry:hover {
     background-color: #8B0000; /* Dark Red */
     color: #fff;
 }
 
-/* Chill Mood Button */
-button.chill {
-    background-color: #66C266; /* Moderate Green */
-}
-button.chill:hover {
-    background-color: #8FBC8F; /* Dark Sea Green */
-    color: #fff;
-}
-
 /* Energetic Mood Button */
 button.energetic {
-    background-color: #800080; /* Purple */
+    background-color: #800080; /* Purple (contrast-checked) */
 }
 button.energetic:hover {
     background-color: #4B0082; /* Indigo */
