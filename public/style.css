@@ -79,41 +79,54 @@ footer {
     padding: 10px 0;
 }
 
+/* General Footer Styling */
+footer {
+    width: 100%;
+    background-color: #f0f0f0;
+    position: fixed; /* Stick to the bottom */
+    bottom: 0;
+    left: 0;
+    display: flex;
+    justify-content: center; /* Center items horizontally */
+    align-items: center; /* Align items vertically */
+    padding: 10px 0;
+    border-top: 1px solid #ccc; /* Optional: subtle border for separation */
+    z-index: 10; /* Ensure it stays above other elements */
+}
+
+/* Footer Container */
 .footer-container {
     display: flex;
-    gap: 20px;
-    align-items: center;
+    gap: 15px; /* Space between items */
 }
 
-/* Footer Link Styling */
-.footer-link {
+/* Button and Link Styles (Consistent with Mood Buttons) */
+.footer-link, .footer-button {
+    padding: 15px 30px;
     font-size: 1.2em;
-    text-decoration: none;
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 5px;
-    background-color: #4A7B4A; /* Matching Chill Button */
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.footer-link:hover {
-    background-color: #3C643C; /* Darker Chill Button */
-    color: #fff;
-}
-
-/* Footer Button Styling */
-.footer-button {
-    padding: 10px 20px;
-    font-size: 1.2em;
+    margin: 10px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    background-color: #DC143C; /* Matching Angry Button */
-    color: #fff;
+    text-decoration: none; /* Remove underline from links */
+    text-align: center;
     transition: background-color 0.3s ease, color 0.3s ease;
+    color: #fff; /* White text */
+    display: inline-block; /* Ensures consistent display for links and buttons */
 }
 
+/* Footer Link Styles */
+.footer-link {
+    background-color: #4A7B4A; /* Matching Chill Button */
+}
+.footer-link:hover {
+    background-color: #3C643C; /* Darker Chill Button */
+}
+
+/* Footer Button Styles */
+.footer-button {
+    background-color: #DC143C; /* Matching Angry Button */
+}
 .footer-button:hover {
     background-color: #8B0000; /* Darker Angry Button */
-    color: #fff;
 }
