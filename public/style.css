@@ -68,28 +68,45 @@ button.energetic:hover {
     color: #fff;
 }
 
-/* Footer styling */
+/* Footer Styling */
 footer {
     position: absolute;
     bottom: 20px;
     width: 100%;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
 }
 
-/* Terms and Privacy buttons */
-button.terms, button.privacy {
-    padding: 10px 20px;
+.footer-link {
+    text-decoration: none;
     font-size: 1em;
-    margin: 5px;
-    border: none;
+    color: #000; /* Black text */
+    border: 1px solid transparent;
+    padding: 10px 15px;
     border-radius: 5px;
-    cursor: pointer;
-    background-color: #333; /* Dark Gray */
-    color: #fff;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-button.terms:hover, button.privacy:hover {
-    background-color: #555; /* Slightly Lighter Gray */
-    color: #fff;
+.footer-link:hover {
+    background-color: #000; /* Black background */
+    color: #fff; /* White text */
+}
+
+/* Logout Button Styling */
+button.logout {
+    padding: 10px 15px;
+    font-size: 1em;
+    border: 1px solid #000; /* Black border */
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #fff; /* White background */
+    color: #000; /* Black text */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button.logout:hover {
+    background-color: #000; /* Black background */
+    color: #fff; /* White text */
 }
