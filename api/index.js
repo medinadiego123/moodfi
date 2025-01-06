@@ -293,13 +293,23 @@ async function addTracksToPlaylist(playlistId, trackUris, accessToken) {
     });
 }
 
-// Logout route to clear session and redirect to home
-app.get('/logout', (req, res) => {
+app.get('/disconnect', (req, res) => {
+    // Clear the session
     req.session.destroy(err => {
-        if (err) console.error('Error clearing session:', err);
-        res.redirect('/');
+        if (err) {
+            console.error('Error clearing session:', err);
+            return res.send('Error disconnecting from Moodfi.');
+        }
+        console.log('User session cleared.');
+        res.send(`
+            <h1>Disconnected Successfully</h1>
+            <p>You have successfully disconnected Moodfi from your Spotify account.</p>
+            <p>To revoke Moodfi's access to your Spotify account, visit:</p>
+            <a href="https://www.spotify.com/account/apps/">Spotify Apps Management</a>
+        `);
     });
 });
+
 
 // Export the app for Vercel serverless function handling
 module.exports = app;
