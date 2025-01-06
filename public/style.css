@@ -18,7 +18,7 @@ body {
 }
 
 /* General Button Styling */
-button, .footer-button, .footer-link {
+button, .footer-link {
     padding: 15px 30px;
     font-size: 1.2em;
     margin: 10px;
@@ -27,7 +27,7 @@ button, .footer-button, .footer-link {
     cursor: pointer;
     transition: background-color 0.3s ease, color 0.3s ease;
     color: #fff;
-    text-decoration: none; /* Ensures links look like buttons */
+    text-decoration: none; /* Removes underline for links */
     display: inline-block; /* Ensures consistency for links and buttons */
 }
 
@@ -50,18 +50,29 @@ button.energetic:hover { background-color: #4B0082; }
 /* Footer Styling */
 footer {
     width: 100%;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
     position: fixed;
     bottom: 0;
     left: 0;
-    background-color: #f0f0f0;
-    text-align: center;
-    padding: 10px 0;
 }
 
-/* Footer Button Styles */
-.footer-button, .footer-link {
+/* Footer Link Styling */
+.footer-link, .footer-button {
     background-color: #4A7B4A; /* Matches Chill Button */
+    color: #fff;
+    margin: 5px;
+    border-radius: 5px;
+    padding: 10px 20px;
+    text-decoration: none; /* Removes underline */
+    font-size: 1.2em;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border: none;
+    cursor: pointer;
 }
-.footer-button:hover, .footer-link:hover {
-    background-color: #3C643C; /* Matches Darker Chill Button */
+
+.footer-link:hover, .footer-button:hover {
+    background-color: #3C643C; /* Darker Chill Button */
 }
