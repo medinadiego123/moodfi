@@ -94,39 +94,3 @@ button.energetic:hover {
     z-index: 10; /* Ensure it stays above other elements */
 }
 
-/* Footer Container */
-.footer-container {
-    display: flex;
-    gap: 15px; /* Space between items */
-}
-
-/* Button and Link Styles (Consistent with Mood Buttons) */
-.footer-link, .footer-button {
-    padding: 15px 30px;
-    font-size: 1.2em;
-    margin: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-decoration: none; /* Remove underline from links */
-    text-align: center;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    color: #fff; /* White text */
-    display: inline-block; /* Ensures consistent display for links and buttons */
-}
-
-/* Footer Link Styles */
-.footer-link {
-    background-color: #4A7B4A; /* Matching Chill Button */
-}
-.footer-link:hover {
-    background-color: #3C643C; /* Darker Chill Button */
-}
-
-/* Footer Button Styles */
-.footer-button {
-    background-color: #DC143C; /* Matching Angry Button */
-}
-.footer-button:hover {
-    background-color: #8B0000; /* Darker Angry Button */
-}
