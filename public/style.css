@@ -18,7 +18,7 @@ body {
 }
 
 /* General Button Styling */
-button, .footer-link {
+button {
     padding: 15px 30px;
     font-size: 1.2em;
     margin: 10px;
@@ -27,8 +27,8 @@ button, .footer-link {
     cursor: pointer;
     transition: background-color 0.3s ease, color 0.3s ease;
     color: #fff;
-    text-decoration: none; /* Removes underline for links */
-    display: inline-block; /* Ensures consistency for links and buttons */
+    text-decoration: none;
+    display: inline-block;
 }
 
 /* Mood Button Styles */
@@ -51,28 +51,27 @@ button.energetic:hover { background-color: #4B0082; }
 footer {
     width: 100%;
     background-color: #f0f0f0; /* Light background color */
-    display: flex; /* Use flexbox for alignment */
+    display: flex;
     justify-content: center; /* Horizontally center the buttons */
     align-items: center; /* Vertically align the buttons */
-    gap: 10px; /* Add space between buttons */
+    gap: 10px; /* Space between buttons */
     padding: 10px 0;
     position: fixed; /* Stick footer to the bottom */
-    bottom: 0; /* Ensure footer is at the bottom */
-    left: 0; /* Align footer to the left */
+    bottom: 0;
+    left: 0;
     z-index: 10; /* Ensure footer is on top of other elements */
-    border-top: 1px solid #ccc; /* Optional: Add a subtle border for separation */
+    border-top: 1px solid #ccc; /* Optional: Subtle border for separation */
 }
 
-/* Footer Button Styling */
+/* Footer Button Specific Styles */
 footer button {
-    background-color: transparent; /* Transparent background for buttons */
+    background-color: transparent; /* Transparent background */
     color: #000; /* Black font color */
-    margin: 5px;
-    border: 1px solid #000; /* Optional: Add a border for better visibility */
+    border: 1px solid #000; /* Black border for visibility */
     border-radius: 5px;
     padding: 10px 20px;
     font-size: 1em;
-    text-decoration: none; /* Remove any underline */
+    text-decoration: none;
     cursor: pointer;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
