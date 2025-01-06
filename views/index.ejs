@@ -16,15 +16,11 @@
             <button class="energetic" onclick="generatePlaylist('energetic')">Energetic</button>
             <button class="angry" onclick="generatePlaylist('angry')">Angry</button>
         </div>
+        <footer>
+            <button class="terms" onclick="window.location.href='/terms'">Terms of Service</button>
+            <button class="privacy" onclick="window.location.href='/privacy'">Privacy Policy</button>
+        </footer>
     </main>
-
-    <footer>
-        <p>
-            <a href="/terms">Terms of Service</a> | 
-            <a href="/privacy">Privacy Policy</a> | 
-            <a href="/disconnect" style="color: red;">Disconnect Moodfi</a>
-        </p>
-    </footer>
 
     <script>
         function generatePlaylist(mood) {

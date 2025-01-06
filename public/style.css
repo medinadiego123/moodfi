@@ -67,3 +67,29 @@ button.energetic:hover {
     background-color: #4B0082; /* Indigo */
     color: #fff;
 }
+
+/* Footer styling */
+footer {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Terms and Privacy buttons */
+button.terms, button.privacy {
+    padding: 10px 20px;
+    font-size: 1em;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #333; /* Dark Gray */
+    color: #fff;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button.terms:hover, button.privacy:hover {
+    background-color: #555; /* Slightly Lighter Gray */
+    color: #fff;
+}

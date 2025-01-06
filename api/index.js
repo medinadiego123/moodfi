@@ -293,6 +293,25 @@ async function addTracksToPlaylist(playlistId, trackUris, accessToken) {
     });
 }
 
+
+// Terms of Service page
+app.get('/terms', (req, res) => {
+    res.send(`
+        <h1>Terms of Service</h1>
+        <p>Welcome to Moodfi's Terms of Service page. Include your terms here.</p>
+        <a href="/">Back to Home</a>
+    `);
+});
+
+// Privacy Policy page
+app.get('/privacy', (req, res) => {
+    res.send(`
+        <h1>Privacy Policy</h1>
+        <p>This is Moodfi's Privacy Policy page. Include your privacy policy here.</p>
+        <a href="/">Back to Home</a>
+    `);
+});
+
 app.get('/disconnect', (req, res) => {
     // Clear the session
     req.session.destroy(err => {
@@ -309,6 +328,7 @@ app.get('/disconnect', (req, res) => {
         `);
     });
 });
+
 
 
 // Export the app for Vercel serverless function handling
