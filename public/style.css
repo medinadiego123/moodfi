@@ -53,17 +53,19 @@ footer {
     background-color: #f0f0f0;
     display: flex;
     justify-content: center;
-    padding: 10px 0;
+    align-items: center; /* Centers items vertically */
+    gap: 10px; /* Adds spacing between elements */
+    padding: 15px 0; /* Adjusts padding for better spacing */
     position: fixed;
     bottom: 0;
     left: 0;
 }
 
-/* Footer Link Styling */
+/* Footer Link & Button Styling */
 .footer-link, .footer-button {
     background-color: #4A7B4A; /* Matches Chill Button */
     color: #fff;
-    margin: 5px;
+    margin: 0; /* Removes default margin */
     border-radius: 5px;
     padding: 10px 20px;
     text-decoration: none; /* Removes underline */
@@ -71,8 +73,11 @@ footer {
     transition: background-color 0.3s ease, color 0.3s ease;
     border: none;
     cursor: pointer;
+    text-align: center; /* Ensures consistent alignment */
 }
 
+/* Hover Effect */
 .footer-link:hover, .footer-button:hover {
     background-color: #3C643C; /* Darker Chill Button */
 }
+
