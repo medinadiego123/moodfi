@@ -49,36 +49,30 @@ button.energetic:hover { background-color: #4B0082; }
 
 /* Footer Styling */
 footer {
-    width: 100%; /* Full-width footer */
-    background-color: #f0f0f0; /* Matches body background */
-    display: flex; /* Flexbox for alignment */
-    justify-content: center; /* Centers items horizontally */
-    align-items: center; /* Centers items vertically */
-    gap: 10px; /* Adds space between elements */
-    padding: 15px 0; /* Adjusts padding for breathing room */
-    position: fixed; /* Sticks to the bottom of the page */
-    bottom: 0; /* Ensures it's at the bottom */
+    width: 100%;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+    position: fixed;
+    bottom: 0;
     left: 0;
-    z-index: 10; /* Ensures it stays on top of other elements */
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Optional: slight shadow for better visibility */
 }
 
-/* Footer Link & Button Styling */
+/* Footer Link Styling */
 .footer-link, .footer-button {
     background-color: #4A7B4A; /* Matches Chill Button */
     color: #fff;
+    margin: 5px;
     border-radius: 5px;
     padding: 10px 20px;
-    font-size: 1em;
     text-decoration: none; /* Removes underline */
+    font-size: 1.2em;
+    transition: background-color 0.3s ease, color 0.3s ease;
     border: none;
     cursor: pointer;
-    text-align: center;
-    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Hover Effect */
 .footer-link:hover, .footer-button:hover {
-    background-color: #3C643C; /* Slightly darker for hover */
+    background-color: #3C643C; /* Darker Chill Button */
 }
-
