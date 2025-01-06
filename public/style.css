@@ -69,7 +69,7 @@ button.energetic:hover {
 }
 
 /* Footer Styling */
-footer {
+.footer {
     width: 100%;
     background-color: #f0f0f0;
     position: absolute;
@@ -80,7 +80,7 @@ footer {
 }
 
 /* General Footer Styling */
-footer {
+.footer {
     width: 100%;
     background-color: #f0f0f0;
     position: fixed; /* Stick to the bottom */
