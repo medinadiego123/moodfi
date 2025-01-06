@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Moodfi</title>
-    <link rel="stylesheet" href="/public/style.css">
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
     <main>
@@ -18,11 +18,12 @@
         </div>
     </main>
     <footer>
-        <button class="terms" onclick="window.location.href='/terms'">Terms</button>
-        <button class="privacy" onclick="window.location.href='/privacy'">Privacy Policy</button>
-        <button class="logout" onclick="window.location.href='/logout'">Logout</button>
-    </footer>    
-
+        <div class="footer-container">
+            <a href="/terms" class="footer-link">Terms</a>
+            <a href="/privacy" class="footer-link">Privacy Policy</a>
+            <button class="footer-button" onclick="window.location.href='/logout'">Logout</button>
+        </div>
+    </footer>
     <script>
         function generatePlaylist(mood) {
             // Redirect to login page with mood parameter

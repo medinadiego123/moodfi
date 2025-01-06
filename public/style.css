@@ -1,23 +1,17 @@
-/* General Body Styling */
 body {
     font-family: Arial, sans-serif;
     display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
     margin: 0;
     background-color: #f0f0f0;
 }
-
-/* Center Container */
 .container {
     text-align: center;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
 }
 
-/* General Button Styling */
+/* General button styling */
 button {
     padding: 15px 30px;
     font-size: 1.2em;
@@ -27,57 +21,99 @@ button {
     cursor: pointer;
     transition: background-color 0.3s ease, color 0.3s ease;
     color: #fff;
-    text-decoration: none;
-    display: inline-block;
 }
 
-/* Mood Button Styles */
-button.happy { background-color: #C68600; }
-button.happy:hover { background-color: #A56600; }
+/* Happy Mood Button */
+button.happy {
+    background-color: #C68600; /* Darker Gold */
+}
+button.happy:hover {
+    background-color: #A56600; /* Darker Orange */
+    color: #fff;
+}
 
-button.sad { background-color: #5A9BD5; }
-button.sad:hover { background-color: #2C78C4; }
+/* Sad Mood Button */
+button.sad {
+    background-color: #5A9BD5; /* Darker Blue */
+}
+button.sad:hover {
+    background-color: #2C78C4; /* Even Darker Blue */
+    color: #fff;
+}
 
-button.chill { background-color: #4A7B4A; }
-button.chill:hover { background-color: #3C643C; }
+/* Chill Mood Button */
+button.chill {
+    background-color: #4A7B4A; /* Darker Green */
+}
+button.chill:hover {
+    background-color: #3C643C; /* Even Darker Green */
+    color: #fff;
+}
 
-button.angry { background-color: #DC143C; }
-button.angry:hover { background-color: #8B0000; }
+/* Angry Mood Button */
+button.angry {
+    background-color: #DC143C; /* Crimson (contrast-checked) */
+}
+button.angry:hover {
+    background-color: #8B0000; /* Dark Red */
+    color: #fff;
+}
 
-button.energetic { background-color: #800080; }
-button.energetic:hover { background-color: #4B0082; }
+/* Energetic Mood Button */
+button.energetic {
+    background-color: #800080; /* Purple (contrast-checked) */
+}
+button.energetic:hover {
+    background-color: #4B0082; /* Indigo */
+    color: #fff;
+}
 
 /* Footer Styling */
 footer {
     width: 100%;
-    background-color: #f0f0f0; /* Light background color */
-    display: flex;
-    justify-content: center; /* Horizontally center the buttons */
-    align-items: center; /* Vertically align the buttons */
-    gap: 10px; /* Space between buttons */
-    padding: 10px 0;
-    position: fixed; /* Stick footer to the bottom */
+    background-color: #f0f0f0;
+    position: absolute;
     bottom: 0;
-    left: 0;
-    z-index: 10; /* Ensure footer is on top of other elements */
-    border-top: 1px solid #ccc; /* Optional: Subtle border for separation */
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
 }
 
-/* Footer Button Specific Styles */
-footer button {
-    background-color: transparent; /* Transparent background */
-    color: #000; /* Black font color */
-    border: 1px solid #000; /* Black border for visibility */
-    border-radius: 5px;
-    padding: 10px 20px;
-    font-size: 1em;
+.footer-container {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+/* Footer Link Styling */
+.footer-link {
+    font-size: 1.2em;
     text-decoration: none;
-    cursor: pointer;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    background-color: #4A7B4A; /* Matching Chill Button */
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Footer Button Hover Effect */
-footer button:hover {
-    background-color: #000; /* Black background on hover */
-    color: #fff; /* White font on hover */
+.footer-link:hover {
+    background-color: #3C643C; /* Darker Chill Button */
+    color: #fff;
+}
+
+/* Footer Button Styling */
+.footer-button {
+    padding: 10px 20px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #DC143C; /* Matching Angry Button */
+    color: #fff;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.footer-button:hover {
+    background-color: #8B0000; /* Darker Angry Button */
+    color: #fff;
 }
