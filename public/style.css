@@ -71,7 +71,26 @@ button.energetic:hover {
 button.privacy {
     background-color: rgb(20, 20, 20);
 }
+
 button.privacy:hover {
+    background-color: #777676;
+    color: #fff;
+}
+
+button.terms {
+    background-color: rgb(20, 20, 20);
+}
+
+button.terms:hover {
+    background-color: #777676;
+    color: #fff;
+}
+
+button.logout {
+    background-color: rgb(20, 20, 20);
+}
+
+button.logout:hover {
     background-color: #777676;
     color: #fff;
 }
