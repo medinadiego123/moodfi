@@ -67,17 +67,3 @@ button.energetic:hover {
     background-color: #4B0082; /* Indigo */
     color: #fff;
 }
-
-footer {
-    text-align: center;
-    margin-top: 20px;
-}
-
-footer a {
-    text-decoration: none;
-    color: #007BFF;
-}
-
-footer a:hover {
-    text-decoration: underline;
-}
