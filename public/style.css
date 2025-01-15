@@ -67,3 +67,11 @@ button.energetic:hover {
     background-color: #4B0082; /* Indigo */
     color: #fff;
 }
+
+button.privacy {
+    background-color: rgb(20, 20, 20);
+}
+button.privacy:hover {
+    background-color: #777676;
+    color: #fff;
+}
