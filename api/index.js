@@ -305,13 +305,37 @@ app.get('/privacy', (req, res) => {
 });
 
 // Logout Route
-app.get('/logout', (req, res) => {
+app.get('/logout', async (req, res) => {
     // Clear the JWT cookie
     res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
     console.log("User logged out successfully");
-    res.redirect('/'); // Redirect to the homepage after logout
-});
 
+    // Optionally revoke the Spotify access token (this will log them out of the Spotify session too)
+    const token = req.cookies.token;
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const accessToken = decoded.accessToken;
+
+            // Revoke Spotify access token (this disconnects the user from the app)
+            await fetch('https://accounts.spotify.com/api/v1/me/logout', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log("Spotify session revoked");
+
+        } catch (error) {
+            console.error('Error revoking Spotify access token:', error);
+        }
+    }
+
+    // Redirect to the homepage after logout
+    res.redirect('/'); // Redirect to the homepage or any page after logout
+});
 
 // Export the app for Vercel serverless function handling
 module.exports = app;
