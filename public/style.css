@@ -68,29 +68,32 @@ button.energetic:hover {
     color: #fff;
 }
 
+/* Privacy Policy Button */
 button.privacy {
-    background-color: rgb(20, 20, 20);
+    background-color: rgb(20, 20, 20) !important;
 }
 
 button.privacy:hover {
-    background-color: #777676;
-    color: #fff;
+    background-color: #777676 !important;
+    color: #fff !important;
 }
 
+/* Terms of Service Button */
 button.terms {
-    background-color: rgb(20, 20, 20);
+    background-color: rgb(20, 20, 20) !important;
 }
 
 button.terms:hover {
-    background-color: #777676;
-    color: #fff;
+    background-color: #777676 !important;
+    color: #fff !important;
 }
 
+/* Logout Button */
 button.logout {
-    background-color: rgb(20, 20, 20);
+    background-color: rgb(20, 20, 20) !important;
 }
 
 button.logout:hover {
-    background-color: #777676;
-    color: #fff;
+    background-color: #777676 !important;
+    color: #fff !important;
 }
