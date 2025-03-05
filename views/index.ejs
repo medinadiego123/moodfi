@@ -128,7 +128,7 @@
       <h1 id="moodPrompt"></h1>
       <!-- Search Box -->
       <div class="search-box">
-        <input type="text" id="moodInput" placeholder="Describe your mood..." onkeypress="handleKeyPress(event)" />
+        <input type="text" id="moodInput" placeholder="Describe your mood..." onkeypress="handleKeyPress(event)" autocomplete="off" />
         <button onclick="generatePlaylist()">
           <!-- Playlist Icon -->
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -172,6 +172,11 @@
   </div>
   <!-- JavaScript for Search Submission -->
   <script>
+    // Ensure the search bar clears on page load
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("moodInput").value = "";
+    });
+
     function generatePlaylist() {
       const mood = document.getElementById('moodInput').value.trim();
       if (mood) {
