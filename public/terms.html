@@ -1,80 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moodfi - Terms of Service</title>
-    <link rel="stylesheet" href="/style.css">
-    <style>
-        body {
-            background-color: #141414;
-            color: white;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            width: 90%;
-            flex: 1;
-        }
-        h1 {
-            font-size: 2em;
-            margin-bottom: 20px;
-        }
-        p, ul {
-            font-size: 1.2em;
-            line-height: 1.5;
-            text-align: left;
-        }
-        ul {
-            padding-left: 20px;
-        }
-        .bottom-buttons {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 15px;
-        }
-        button {
-            background-color: rgb(20, 20, 20);
-            color: white;
-            border: 2px solid white;
-            padding: 12px 24px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s ease-in-out;
-        }
-        button:hover {
-            background-color: white;
-            color: black;
-            border-color: black;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moodfi - Terms of Service</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #141414;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      width: 90%;
+      flex: 1;
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+    p, ul {
+      font-size: 1.2em;
+      line-height: 1.5;
+      text-align: left;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    .bottom-buttons {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+    }
+    button {
+      background-color: rgb(20, 20, 20);
+      color: white;
+      border: 2px solid white;
+      padding: 12px 24px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+    }
+    button:hover {
+      background-color: white;
+      color: black;
+      border-color: black;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Terms of Service</h1>
-        <p>Welcome to Moodfi! By using our app, you agree to the following terms:</p>
-        <ul>
-            <li>You must have a valid Spotify account.</li>
-            <li>Moodfi generates playlists based on user input and Spotify API data.</li>
-            <li>You retain ownership of your Spotify data.</li>
-            <li>We do not store personal user data or Spotify credentials.</li>
-        </ul>
-        <p>For questions, contact us at <strong>support@moodfi.com</strong>.</p>
-    </div>
-
-    <div class="bottom-buttons">
-        <button onclick="window.location.href='/'">Back to Moodfi</button>
-        <button onclick="window.location.href='/privacy'">Privacy Policy</button>
-    </div>
+  <div class="container">
+    <h1>Terms of Service</h1>
+    <p>Welcome to Moodfi! By using our app, you agree to the following terms:</p>
+    <ul>
+      <li>You must have a valid Spotify account to use Moodfi.</li>
+      <li>Moodfi uses AI technology—including OpenAI, Gemini, and DeepSeek—to analyze your mood and generate personalized playlists.</li>
+      <li>The generated playlists are created using data from Spotify's API along with your listening history (if available).</li>
+      <li>We do not store your personal data or Spotify credentials. All data is used solely during your session for playlist generation.</li>
+      <li>You retain ownership of your Spotify data, and you are responsible for maintaining the security of your account.</li>
+      <li>Moodfi is provided "as is" without warranties. We are not liable for any issues arising from its use.</li>
+    </ul>
+    <p>If you have any questions, please contact us at <strong>support@moodfi.com</strong>.</p>
+  </div>
+  <div class="bottom-buttons">
+    <button onclick="window.location.href='/'">Back to Moodfi</button>
+    <button onclick="window.location.href='/privacy'">Privacy Policy</button>
+  </div>
 </body>
 </html>

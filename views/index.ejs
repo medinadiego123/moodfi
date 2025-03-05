@@ -1,93 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moodfi</title>
-    <link rel="stylesheet" href="/style.css">
-    <style>
-        body {
-            background-color: #141414;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: auto;
-        }
-        h1 {
-            font-size: 2em;
-            margin-bottom: 20px;
-        }
-        .bottom-buttons {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 15px;
-        }
-        button {
-            background-color: rgb(20, 20, 20);
-            color: white;
-            border: 2px solid white;
-            padding: 12px 24px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s ease-in-out;
-        }
-        button:hover {
-            background-color: white;
-            color: black;
-            border-color: black;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moodfi</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    /* Full-page styling */
+    body {
+      background-color: #141414;
+      color: white;
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    /* Main container */
+    .container {
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+    }
+    /* Title */
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    /* Search box container */
+    .search-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 12px;
+      border: 2px solid white;
+      background-color: rgb(20, 20, 20);
+      color: white;
+      border-radius: 25px;
+      transition: all 0.3s ease-in-out;
+      position: relative;
+    }
+    /* Input field */
+    .search-box input {
+      width: 85%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: white;
+      font-size: 1.2em;
+      padding: 10px;
+    }
+    /* Playlist button icon */
+    .search-box button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+    }
+    /* Playlist icon */
+    .search-box svg {
+      fill: white;
+      width: 28px;
+      height: 28px;
+      transition: all 0.3s ease-in-out;
+    }
+    .search-box button:hover svg {
+      fill: #1DB954;
+    }
+    /* Spotify Embed */
+    .playlist-container {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 600px;
+    }
+    /* Bottom buttons */
+    .bottom-buttons {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+    }
+    .bottom-buttons button {
+      background-color: rgb(20, 20, 20);
+      color: white;
+      border: 2px solid white;
+      padding: 12px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s ease-in-out;
+    }
+    .bottom-buttons button:hover {
+      background-color: white;
+      color: black;
+      border-color: black;
+    }
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8em;
+      }
+      .search-box {
+        padding: 10px;
+      }
+      .search-box input {
+        font-size: 1em;
+      }
+      .bottom-buttons {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <main>
-        <div class="container">
-            <h1>Choose Your Mood</h1>
-            <button class="happy" onclick="generatePlaylist('happy')">Happy</button>
-            <button class="sad" onclick="generatePlaylist('sad')">Sad</button>
-            <button class="chill" onclick="generatePlaylist('chill')">Chill</button>
-            <button class="energetic" onclick="generatePlaylist('energetic')">Energetic</button>
-            <button class="angry" onclick="generatePlaylist('angry')">Angry</button>
-        </div>
-
-        <!-- Spotify Player (Only Visible After Playlist is Generated) -->
-        <% if (typeof playlistId !== 'undefined' && playlistId) { %>
-            <iframe style="border-radius:12px" 
-                src="https://open.spotify.com/embed/playlist/<%= playlistId %>?utm_source=generator&theme=0"
-                width="100%" 
-                height="380" 
-                frameborder="0" 
-                allowfullscreen="" 
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
-            </iframe>
-        <% } %>
-    </main>
-
-    <!-- Show Logout Button Only If a Playlist Exists -->
-    <% if (typeof playlistId !== 'undefined' && playlistId) { %>
-        <div class="bottom-buttons">
-            <button class="privacy" onclick="window.location.href='/privacy'">Privacy Policy</button>
-            <button class="terms" onclick="window.location.href='/terms'">Terms of Service</button>
-            <button class="logout" onclick="window.location.href='/logout'">Logout</button>
-        </div>
-    <% } else { %>
-        <div class="bottom-buttons">
-            <button class="privacy" onclick="window.location.href='/privacy'">Privacy Policy</button>
-            <button class="terms" onclick="window.location.href='/terms'">Terms of Service</button>
-        </div>
-    <% } %>
-
+  <main>
+    <div class="container">
+      <h1 id="moodPrompt"></h1>
+      <!-- Search Box -->
+      <div class="search-box">
+        <input type="text" id="moodInput" placeholder="Describe your mood..." onkeypress="handleKeyPress(event)" />
+        <button onclick="generatePlaylist()">
+          <!-- Playlist Icon -->
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 3h18v2H3V3zm0 6h12v2H3V9zm0 6h12v2H3v-2zm14 3.5c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zM17 13h6v2h-6v-2z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <!-- JavaScript for Random Prompts -->
     <script>
-        function generatePlaylist(mood) {
-            window.location.href = `/login?mood=${mood}`;
-        }
+      const prompts = [
+        "What’s your vibe today?",
+        "What do you feel like listening to?",
+        "Set the mood. What’s your pick?",
+        "Pick a vibe. What are we listening to?",
+        "Tell me your mood, I’ll pick the music."
+      ];
+      document.getElementById("moodPrompt").innerText = prompts[Math.floor(Math.random() * prompts.length)];
     </script>
+    <!-- Spotify Playlist Embed -->
+    <% if (typeof playlistId !== "undefined" && playlistId) { %>
+      <div class="playlist-container">
+        <iframe style="border-radius:12px"
+          src="https://open.spotify.com/embed/playlist/<%= playlistId %>?utm_source=generator&theme=0"
+          width="100%"
+          height="380"
+          frameborder="0"
+          allowfullscreen=""
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
+        </iframe>
+      </div>
+    <% } %>
+  </main>
+  <!-- Bottom Buttons -->
+  <div class="bottom-buttons">
+    <button onclick="window.location.href='/privacy'">Privacy Policy</button>
+    <button onclick="window.location.href='/terms'">Terms of Service</button>
+    <% if (typeof playlistId !== "undefined" && playlistId) { %>
+      <button onclick="window.location.href='/logout'">Logout</button>
+    <% } %>
+  </div>
+  <!-- JavaScript for Search Submission -->
+  <script>
+    function generatePlaylist() {
+      const mood = document.getElementById('moodInput').value.trim();
+      if (mood) {
+        window.location.href = `/login?mood=${encodeURIComponent(mood)}`;
+      } else {
+        alert("Please enter a mood or genre!");
+      }
+    }
+    function handleKeyPress(event) {
+      if (event.key === "Enter") {
+        generatePlaylist();
+      }
+    }
+  </script>
 </body>
 </html>

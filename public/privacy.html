@@ -1,80 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moodfi - Privacy Policy</title>
-    <link rel="stylesheet" href="/style.css">
-    <style>
-        body {
-            background-color: #141414;
-            color: white;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            text-align: center;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            width: 90%;
-            flex: 1;
-        }
-        h1 {
-            font-size: 2em;
-            margin-bottom: 20px;
-        }
-        p, ul {
-            font-size: 1.2em;
-            line-height: 1.5;
-            text-align: left;
-        }
-        ul {
-            padding-left: 20px;
-        }
-        .bottom-buttons {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 15px;
-        }
-        button {
-            background-color: rgb(20, 20, 20);
-            color: white;
-            border: 2px solid white;
-            padding: 12px 24px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s ease-in-out;
-        }
-        button:hover {
-            background-color: white;
-            color: black;
-            border-color: black;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moodfi - Privacy Policy</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #141414;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      width: 90%;
+      flex: 1;
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+    p, ul {
+      font-size: 1.2em;
+      line-height: 1.5;
+      text-align: left;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    .bottom-buttons {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+    }
+    button {
+      background-color: rgb(20, 20, 20);
+      color: white;
+      border: 2px solid white;
+      padding: 12px 24px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+    }
+    button:hover {
+      background-color: white;
+      color: black;
+      border-color: black;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Privacy Policy</h1>
-        <p>At Moodfi, we respect your privacy and are committed to protecting your information.</p>
-        <ul>
-            <li>Moodfi uses Spotify's API to access your top artists and tracks.</li>
-            <li>We do not store your access tokens or personal data.</li>
-            <li>Your session is temporary and only used to create playlists.</li>
-            <li>You can disconnect Moodfi at any time.</li>
-        </ul>
-        <p>For questions, contact us at <strong>support@moodfi.com</strong>.</p>
-    </div>
-
-    <div class="bottom-buttons">
-        <button onclick="window.location.href='/'">Back to Moodfi</button>
-        <button onclick="window.location.href='/terms'">Terms of Service</button>
-    </div>
+  <div class="container">
+    <h1>Privacy Policy</h1>
+    <p>At Moodfi, your privacy is our priority. We are committed to protecting your personal information and ensuring that your data is used responsibly.</p>
+    <ul>
+      <li>Moodfi uses Spotify's API to access your top artists and tracks, which helps generate personalized playlists.</li>
+      <li>We do not store your Spotify credentials, access tokens, or any personal data. All authentication data is managed securely and used only during your session.</li>
+      <li>Your mood input and listening history are used solely to generate playlists and are not shared with third parties.</li>
+      <li>Our AI mood analysis leverages trusted providers (OpenAI, Gemini, DeepSeek). Any data processed by these services is subject to their privacy policies.</li>
+      <li>You can disconnect Moodfi at any time, which will clear your session data from our system.</li>
+    </ul>
+    <p>If you have any questions or concerns about your privacy, please contact us at <strong>support@moodfi.com</strong>.</p>
+  </div>
+  <div class="bottom-buttons">
+    <button onclick="window.location.href='/'">Back to Moodfi</button>
+    <button onclick="window.location.href='/terms'">Terms of Service</button>
+  </div>
 </body>
 </html>
