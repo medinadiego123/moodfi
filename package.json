@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "api/index.js",
   "scripts": {
-    "start": "node api/index.js"
+    "start": "cross-env NODE_ENV=production node api/index.js",
+    "dev": "cross-env NODE_ENV=development node api/index.js"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",
@@ -19,5 +20,9 @@
   "author": "Diego Medina",
   "license": "MIT",
   "description": "Moodfi 🎶",
-  "keywords": []
+  "keywords": [],
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "nodemon": "^3.1.9"
+  }
 }

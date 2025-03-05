@@ -25,10 +25,10 @@ button {
 
 /* Happy Mood Button */
 button.happy {
-    background-color: #C68600; /* Darker Gold */
+    background-color: #ddca1d; /* Bright Gold */
 }
 button.happy:hover {
-    background-color: #A56600; /* Darker Orange */
+    background-color: #d4b800; /*  Darker Gold */
     color: #fff;
 }
 
@@ -52,7 +52,7 @@ button.chill:hover {
 
 /* Angry Mood Button */
 button.angry {
-    background-color: #DC143C; /* Crimson (contrast-checked) */
+    background-color: #be1235; /* Crimson (contrast-checked) */
 }
 button.angry:hover {
     background-color: #8B0000; /* Dark Red */
