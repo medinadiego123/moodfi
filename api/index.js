@@ -28,7 +28,7 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 //  Ensure Root Route is Working
 app.get("/", (req, res) => {
-    res.render("index");
+    res.render("index", { tracks: [], moodSelected: false }); // Ensure the page starts without showing the message
 });
 
 //  Ensure Spotify Auth Works
@@ -36,7 +36,7 @@ app.get('/login', (req, res) => {
     console.log("Redirecting to Spotify authorization");
     const mood = req.query.mood || '';
     const authUrl = `https://accounts.spotify.com/authorize?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=${SCOPES}&state=${mood}`;
-    console.log(`Redirecting to: ${authUrl}`);  // ✅ Debug log
+    console.log(`Redirecting to: ${authUrl}`);  // Debug log
     res.redirect(authUrl);
 });
 
@@ -94,7 +94,7 @@ app.listen(port, () => {
 });
 
 // Route to generate a playlist
-app.get('/generate', async (req, res) => {
+app.get("/generate", async (req, res) => {
     const mood = req.query.mood;
 
     // Get JWT from cookies
@@ -104,7 +104,8 @@ app.get('/generate', async (req, res) => {
         return res.redirect('/login');
     }
 
-    let accessToken, refreshToken;
+    let accessToken, refreshToken, playlistId = null;
+    let formattedTracks = [];
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -119,34 +120,42 @@ app.get('/generate', async (req, res) => {
 
     try {
         const userSeeds = await getUserTopArtistsAndTracks(accessToken);
-
-        // 🛑 Ensure userSeeds properties exist
         userSeeds.topArtists = userSeeds.topArtists || [];
         userSeeds.topTracks = userSeeds.topTracks || [];
 
         console.log("User Seeds:", userSeeds);
 
-        // ✅ Check if user has any history; otherwise, use mood-based genres
         const recommendations = await searchTracks(mood, userSeeds, accessToken);
         console.log("Recommendations:", recommendations);
 
         if (!recommendations || recommendations.length === 0) {
-            console.error("No recommendations found, redirecting to /");
-            return res.redirect('/');
+            console.error("No recommendations found.");
+            return res.render("index", { tracks: [], moodSelected: true, playlistId: null });
         }
 
+        // Ensure `formattedTracks` is always defined
+        formattedTracks = recommendations.map(track => ({
+            id: track.id,
+            name: track.name,
+            artist: track.artists.map(artist => artist.name).join(", "),
+            albumCover: track.album.images[0]?.url || "/default-cover.png",
+            spotifyLink: `https://open.spotify.com/track/${track.id}`
+        }));
+
+        // Ensure `playlistId` is always defined
         const trackUris = recommendations.map(track => track.uri);
         const playlistName = `Moodfi - ${mood.charAt(0).toUpperCase() + mood.slice(1)} Playlist`;
-        const playlistId = await createPlaylist(playlistName, accessToken);
+        playlistId = await createPlaylist(playlistName, accessToken);
         await addTracksToPlaylist(playlistId, trackUris, accessToken);
 
-        res.redirect(`https://open.spotify.com/playlist/${playlistId}`);
     } catch (error) {
-        console.error('Error generating playlist:', error);
-        res.send('Error generating playlist: ' + error.message);
+        console.error("Error generating playlist:", error);
+        return res.render("index", { tracks: [], moodSelected: true, playlistId: null });
     }
-});
 
+    // Always pass `formattedTracks` and `playlistId`
+    res.render("index", { tracks: formattedTracks, moodSelected: true, playlistId });
+});
 
 // Helper function to refresh the access token if needed
 async function refreshAccessToken(refreshToken) {
@@ -182,7 +191,7 @@ async function getUserTopArtistsAndTracks(accessToken) {
             })
         ]);
 
-        // 🛑 Log Full API Responses for Debugging
+        // Log Full API Responses for Debugging
         const topArtistsText = await topArtistsResponse.text();
         const topTracksText = await topTracksResponse.text();
         console.log("🔹 Raw Spotify Response (Artists):", topArtistsText);
@@ -335,17 +344,17 @@ app.get('/privacy', (req, res) => {
 
 // Logout Route
 app.get('/logout', (req, res) => {
-    // 1️⃣ Clear the JWT cookie
+    // Clear the JWT cookie
     res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
     console.log("✅ User logged out and cookie cleared");
 
-    // 2️⃣ Determine Redirect Based on Environment
+    // Determine Redirect Based on Environment
     const isProduction = process.env.NODE_ENV === 'production';
     const REDIRECT_AFTER_LOGOUT = isProduction 
-        ? "https://moodfi.vercel.app"   // ✅ Redirect to the live Moodfi site in production
-        : "http://localhost:3000";       // ✅ Redirect to local dev site in development
+        ? "https://moodfi.vercel.app"   // Redirect to the live Moodfi site in production
+        : "http://localhost:3000";       // Redirect to local dev site in development
 
-    // 3️⃣ Redirect to Spotify’s Logout Page, Then Back to Moodfi
+    // Redirect to Spotify’s Logout Page, Then Back to Moodfi
     const SPOTIFY_LOGOUT_URL = "https://accounts.spotify.com/en/logout";
     res.redirect(`${SPOTIFY_LOGOUT_URL}?continue=${encodeURIComponent(REDIRECT_AFTER_LOGOUT)}`);
 });
