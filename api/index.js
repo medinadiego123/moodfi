@@ -39,7 +39,7 @@ app.use(express.static(path.join(__dirname, "../public")));
 // Home Route
 app.get("/", (req, res) => {
   const token = req.cookies.token;
-  res.render("index", { tracks: [], moodSelected: false, playlistId: null, isLoggedIn: !!token });
+  res.render("index", { tracks: [], moodSelected: false, playlistId: null, isLoggedIn: Boolean(token) });
 });
 
 // Spotify Authentication
@@ -100,6 +100,19 @@ async function refreshAccessToken(refreshToken) {
   }
 }
 
+/**
+ * Generates a playlist name based on the current day of the week.
+ * For example, if today is Friday, it returns "Your Friday Playlist🤘🎶".
+ *
+ * @returns {string} - The generated playlist name.
+ */
+function generateDayPlaylistName() {
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const today = new Date();
+  const dayName = days[today.getDay()];
+  return `Your ${dayName} Playlist🤘🎶`;
+}
+
 // AI Mood Analysis with Fallback Chain: OpenAI → Gemini → DeepSeek → Manual
 async function analyzeMood(userInput) {
   const prompt = `
@@ -149,9 +162,7 @@ async function callGemini(userInput) {
     contents: [
       {
         parts: [
-          {
-            text: `Analyze: "${userInput}". Extract mood, genre, and artist in JSON format.`
-          }
+          { text: `Analyze: "${userInput}". Extract mood, genre, and artist in JSON format.` }
         ]
       }
     ]
@@ -166,7 +177,6 @@ async function callGemini(userInput) {
     if (typeof candidateContent === "object" && candidateContent.parts && candidateContent.parts.length > 0) {
       candidateContent = candidateContent.parts[0].text;
     }
-    // Remove Markdown formatting if present.
     candidateContent = candidateContent.replace(/```json\s*/, "").replace(/\s*```/, "").trim();
     return JSON.parse(candidateContent);
   } catch (error) {
@@ -201,89 +211,71 @@ function extractMoodFromKeywords(userInput) {
 
 // Playlist Generation Route
 app.get("/generate", async (req, res) => {
-    const mood = req.query.mood;
-    if (!mood) return res.redirect("/");
-  
-    const token = req.cookies.token;
-    if (!token) return res.redirect("/login");
-  
-    let accessToken, refreshToken, playlistId = null;
-    try {
-      const decoded = jwt.verify(token, JWT_SECRET);
-      accessToken = decoded.accessToken;
-      refreshToken = decoded.refreshToken;
-    } catch (error) {
-      return res.redirect("/login");
-    }
-  
-    console.log("User input for mood:", mood);
-    const moodData = await analyzeMood(mood);
-    console.log("🎵 AI Mood Data:", moodData);
-  
-    
-    function formatPlaylistName(moodData) {
-      let mood = Array.isArray(moodData.mood) ? moodData.mood[0] : moodData.mood;
-      let genre = Array.isArray(moodData.genre) ? moodData.genre[0] : moodData.genre;
-      let artist = Array.isArray(moodData.artist) ? moodData.artist[0] : moodData.artist;
-  
-      // Ensure proper capitalization
-      mood = mood ? mood.charAt(0).toUpperCase() + mood.slice(1) : "";
-      genre = genre ? genre.charAt(0).toUpperCase() + genre.slice(1) : "";
-      artist = artist ? artist.charAt(0).toUpperCase() + artist.slice(1) : "";
-  
-      // Generate a clean, short playlist name
-      if (artist) return `${artist} Playlist`;
-      if (mood) return `${mood} Playlist`;
-      if (genre) return `${genre} Playlist`;
-  
-      return "Moodfi Playlist"; // Fallback
+  const mood = req.query.mood;
+  if (!mood) return res.redirect("/");
+
+  const token = req.cookies.token;
+  if (!token) return res.redirect("/login");
+
+  let accessToken, refreshToken, playlistId = null;
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    accessToken = decoded.accessToken;
+    refreshToken = decoded.refreshToken;
+  } catch (error) {
+    return res.redirect("/login");
   }
-  
-  // Use this function when creating the playlist
-  const playlistName = formatPlaylistName(moodData);
-  console.log("✅ Final Playlist Name:", playlistName);
-  
-  
-    playlistId = await createPlaylist(playlistName, accessToken);
-    if (!playlistId) {
-      console.error("🚨 Failed to create a valid playlist ID.");
-      return res.render("index", { moodSelected: true, isLoggedIn: !!token, playlistId: null });
-    }
-    console.log("✅ Final Playlist ID:", playlistId);
-  
-    // Get user's listening history seeds.
-    const userSeeds = await getUserTopArtistsAndTracks(accessToken);
-    const isNewUser = userSeeds.topArtists.length === 0 && userSeeds.topTracks.length === 0;
-  
-    // Attempt to fetch recommendations using the AI-determined mood and user seeds.
-    let recommendations = await searchTracks(moodData.mood, userSeeds, accessToken);
-    if (!recommendations || recommendations.length === 0) {
-      console.error("⚠ No recommendations found.");
-      // Fallback: For new users, use generalized mood-based tracks; for existing users, use history-based fallback.
-      const defaultMoodGenres = {
-        happy: ["pop", "indie-pop", "funk", "soul", "disco", "electropop"],
-        sad: ["shoegaze", "folk", "acoustic", "melancholia", "blues", "piano"],
-        angry: ["metal", "punk", "hardcore", "rock", "grunge", "industrial"],
-        chill: ["lo-fi", "chill", "ambient", "jazz", "soul", "downtempo"],
-        energetic: ["edm", "dance", "hip-hop", "house", "trap", "drill"]
-      };
-      const fallbackGenres = defaultMoodGenres[moodData.mood] || ["pop"];
-      recommendations = await fetchAdditionalTracks(fallbackGenres, 10, accessToken);
-    }
-    if (!recommendations || recommendations.length === 0) {
-      console.error("❌ Failed to generate playlist. No tracks found.");
-      return res.render("index", { moodSelected: true, isLoggedIn: !!token, playlistId });
-    }
-    const trackUris = recommendations.map(track => track.uri);
-    console.log("🎵 Track URIs to be added:", trackUris);
-    const success = await addTracksToPlaylist(playlistId, trackUris, accessToken);
-    if (!success) {
-      console.error("❌ Failed to add tracks to playlist.");
-    }
-  
-    res.render("index", { moodSelected: true, isLoggedIn: !!token, playlistId });
+
+  console.log("User input for mood:", mood);
+  const moodData = await analyzeMood(mood);
+  console.log("AI Mood Data:", moodData);
+
+  // Use weekday-based naming for a short, clean playlist name.
+  const playlistName = generateDayPlaylistName();
+  console.log("Final Playlist Name:", playlistName);
+
+  playlistId = await createPlaylist(playlistName, accessToken);
+  if (!playlistId) {
+    console.error("🚨 Failed to create a valid playlist ID.");
+    return res.redirect("/");
+  }
+  console.log("Final Playlist ID:", playlistId);
+
+  // Get user's listening history seeds.
+  const userSeeds = await getUserTopArtistsAndTracks(accessToken);
+  let trackUris = await searchTracks(moodData.mood, userSeeds, accessToken, mood);
+
+  if (!trackUris || trackUris.length === 0) {
+    console.warn("⚠ No tracks found, falling back to default.");
+    trackUris = await fetchAdditionalTracks(["pop"], 10, accessToken);
+  }
+  if (!trackUris || trackUris.length === 0) {
+    console.error("❌ No valid tracks to add. Redirecting back.");
+    return res.redirect("/");
+  }
+  console.log("🎵 Track URIs to be added:", trackUris);
+
+  const tracksAdded = await addTracksToPlaylist(playlistId, trackUris, accessToken);
+  if (!tracksAdded) {
+    console.error("🚨 Failed to add tracks to playlist.");
+    return res.redirect("/");
+  }
+
+  return res.redirect(`/playlist?playlistId=${playlistId}`);
+});
+
+// New route for displaying the playlist separately
+app.get("/playlist", (req, res) => {
+  const token = req.cookies.token;
+  const playlistId = req.query.playlistId;
+  if (!playlistId) return res.redirect("/");
+
+  res.render("playlist", {
+    playlistId: playlistId,
+    isLoggedIn: Boolean(token)
   });
-  
+});
+
 // Helper function to fetch additional tracks if needed
 async function fetchAdditionalTracks(genres, requiredCount, accessToken) {
   let additionalTracks = [];
@@ -312,40 +304,53 @@ async function fetchAdditionalTracks(genres, requiredCount, accessToken) {
   }
 }
 
-async function searchTracks(mood, userSeeds, accessToken) {
+// Updated searchTracks function to use the original query for precision
+async function searchTracks(mood, userSeeds, accessToken, originalQuery) {
   const params = { limit: 10 };
-  const isExistingUser = userSeeds.topArtists.length > 0 || userSeeds.topTracks.length > 0;
-  const moodGenres = {
-    happy: ["pop", "indie-pop", "funk", "soul", "disco", "electropop"],
-    sad: ["shoegaze", "folk", "acoustic", "melancholia", "blues", "piano"],
-    angry: ["metal", "punk", "hardcore", "rock", "grunge", "industrial"],
-    chill: ["lo-fi", "chill", "ambient", "jazz", "soul", "downtempo"],
-    energetic: ["edm", "dance", "hip-hop", "house", "trap", "drill"],
-  };
-  const moodAttributes = {
-    happy: { min_valence: 0.6, min_energy: 0.5, min_tempo: 120, max_tempo: 160 },
-    sad: { max_valence: 0.4, max_energy: 0.6, min_acousticness: 0.3, max_tempo: 100 },
-    chill: { max_energy: 0.5, min_acousticness: 0.3, max_tempo: 110 },
-    energetic: { min_energy: 0.7, min_tempo: 130 },
-    angry: { min_energy: 0.8, min_loudness: -5, min_tempo: 140 },
-  };
-  if (isExistingUser) {
+
+  // Define known genre keywords (expand as needed)
+  const knownGenres = ["shoegaze", "hip-hop", "rap", "edm", "pop", "rock", "r&b", "jazz", "folk", "electronic"];
+  let selectedGenre = null;
+  const queryLower = originalQuery.toLowerCase();
+  for (const genre of knownGenres) {
+    if (queryLower.includes(genre)) {
+      selectedGenre = genre;
+      break;
+    }
+  }
+
+  if (userSeeds.topArtists.length > 0 || userSeeds.topTracks.length > 0) {
     params.seed_artists = userSeeds.topArtists.slice(0, 2).join(",");
     params.seed_tracks = userSeeds.topTracks.slice(0, 2).join(",");
   } else {
     console.log("⚠ New user detected. Using default genres.");
-    params.seed_genres = moodGenres[mood]?.slice(0, 3).join(",") || "pop";
+    // Use the detected genre if available, otherwise fallback to the mood mapping.
+    if (selectedGenre) {
+      params.seed_genres = selectedGenre;
+    } else {
+      const moodGenres = {
+        happy: ["pop", "indie-pop", "funk", "soul", "disco", "electropop"],
+        sad: ["shoegaze", "folk", "acoustic", "melancholia", "blues", "piano"],
+        angry: ["metal", "punk", "hardcore", "rock", "grunge", "industrial"],
+        chill: ["lo-fi", "chill", "ambient", "jazz", "soul", "downtempo"],
+        energetic: ["edm", "dance", "hip-hop", "house", "trap", "drill"],
+      };
+      params.seed_genres = (moodGenres[mood] || ["pop"]).slice(0, 3).join(",");
+    }
   }
-  Object.assign(params, moodAttributes[mood] || {});
-  const query = new URLSearchParams(params).toString();
-  const url = `https://api.spotify.com/v1/recommendations?${query}`;
+
+  // Apply default mood attributes (customize if needed)
+  Object.assign(params, { min_valence: 0.4, max_valence: 0.6 });
+  const queryStr = new URLSearchParams(params).toString();
+  const url = `https://api.spotify.com/v1/recommendations?${queryStr}`;
+
   try {
     const response = await fetch(url, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     const data = await response.json();
     console.log(`✅ Received ${data.tracks?.length || 0} tracks from Spotify API.`);
-    return data.tracks || [];
+    return data.tracks ? data.tracks.map(track => track.uri) : [];
   } catch (error) {
     console.error("❌ Error fetching recommendations:", error);
     return [];
@@ -499,12 +504,12 @@ async function getUserId(accessToken) {
   }
 }
 
-// Serve Privacy Policy
+// Privacy Policy
 app.get("/privacy", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/privacy.html"));
 });
 
-// Serve Terms of Service
+// Terms of Service
 app.get("/terms", (req, res) => {
   res.sendFile(path.join(__dirname, "../public/terms.html"));
 });
@@ -519,7 +524,6 @@ app.get("/logout", (req, res) => {
   res.redirect(`${SPOTIFY_LOGOUT_URL}?continue=${encodeURIComponent(MOODFI_HOMEPAGE)}`);
 });
 
-// Start Server
 app.listen(port, () => {
   console.log(`🚀 Moodfi server running at http://localhost:${port}`);
 });
