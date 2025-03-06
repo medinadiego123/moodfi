@@ -220,19 +220,29 @@ app.get("/generate", async (req, res) => {
     const moodData = await analyzeMood(mood);
     console.log("🎵 AI Mood Data:", moodData);
   
-    // Use a special-case for "sadboys" in the original user query
-    const userInputLower = mood.toLowerCase();
-    let playlistName;
-    if (userInputLower.includes("sadboys")) {
-      playlistName = "Sadboys Playlist";
-    } else {
-      // Handle if moodData.mood and moodData.artist are arrays
-      const moodStr = Array.isArray(moodData.mood) ? moodData.mood[0] : moodData.mood;
-      const artistStr = Array.isArray(moodData.artist) ? moodData.artist[0] : moodData.artist;
-      playlistName = artistStr 
-        ? `${moodStr.charAt(0).toUpperCase() + moodStr.slice(1)} ${artistStr}`
-        : `${moodStr.charAt(0).toUpperCase() + moodStr.slice(1)} Playlist`;
-    }
+    
+    function formatPlaylistName(moodData) {
+      let mood = Array.isArray(moodData.mood) ? moodData.mood[0] : moodData.mood;
+      let genre = Array.isArray(moodData.genre) ? moodData.genre[0] : moodData.genre;
+      let artist = Array.isArray(moodData.artist) ? moodData.artist[0] : moodData.artist;
+  
+      // Ensure proper capitalization
+      mood = mood ? mood.charAt(0).toUpperCase() + mood.slice(1) : "";
+      genre = genre ? genre.charAt(0).toUpperCase() + genre.slice(1) : "";
+      artist = artist ? artist.charAt(0).toUpperCase() + artist.slice(1) : "";
+  
+      // Generate a clean, short playlist name
+      if (artist) return `${artist} Playlist`;
+      if (mood) return `${mood} Playlist`;
+      if (genre) return `${genre} Playlist`;
+  
+      return "Moodfi Playlist"; // Fallback
+  }
+  
+  // Use this function when creating the playlist
+  const playlistName = formatPlaylistName(moodData);
+  console.log("✅ Final Playlist Name:", playlistName);
+  
   
     playlistId = await createPlaylist(playlistName, accessToken);
     if (!playlistId) {
